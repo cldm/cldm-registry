@@ -8,7 +8,10 @@
                #:cl-who
                #:hunchentoot
                #:clsql-postgresql
-	       #:parenscript)
+	       #:parenscript
+	       #:babel
+	       #:ironclad
+	       #:cl-smtp)
   :serial t
   :components ((:module :src
 			:components
@@ -21,4 +24,5 @@
 			 (:module :frontend
 				  :components
 				  ((:file "package")
+				   (:file "encrypt")
 				   (:file "app")))))))
