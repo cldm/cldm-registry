@@ -7,10 +7,18 @@
   :depends-on (#:cldm
                #:cl-who
                #:hunchentoot
-               #:sxql
-               #:cl-dbi
+               #:clsql-postgresql
 	       #:parenscript)
   :serial t
-  :components ((:file "package")
-               (:file "cldm-registry")))
-
+  :components ((:module :src
+			:components
+			((:file "package")
+			 (:file "cldm-registry")
+			 (:module :model
+				  :components
+				  ((:file "package")
+				   (:file "user")))
+			 (:module :frontend
+				  :components
+				  ((:file "package")
+				   (:file "app")))))))
