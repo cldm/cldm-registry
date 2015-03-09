@@ -21,7 +21,9 @@
 				  :components
 				  ((:file "package")
 				   (:file "model")
-				   (:file "user")))
+				   (:file "user")
+				   (:file "category")
+				   (:file "library")))
 			 (:module :frontend
 				  :components
 				  ((:file "package")

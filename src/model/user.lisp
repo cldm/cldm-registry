@@ -23,11 +23,16 @@
 	  :accessor email
 	  :initform nil
 	  :type string)
+   (avatar :initarg :avatar
+	   :accessor avatar
+	   :initform nil
+	   :type string)
    (github-token :initarg :github-token
 		 :accessor github-token
 		 :initform nil
 		 :type string)
    (registration-time :initarg :registration-time
 		      :accessor registration-time
-		      :initform (get-time)))
+		      :initform (get-time)
+		      :type wall-time))
   (:base-table "registry-user"))
