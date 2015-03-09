@@ -5,6 +5,8 @@
 (defparameter +db-user+ "postgres")
 (defparameter +db-pass+ "postgres")
 
+(enable-sql-reader-syntax)
+
 (defun connect-db ()
   (connect (list +db-host+ +db-name+ +db-user+ +db-pass+)
 	   :database-type :postgresql :if-exists :new)
@@ -16,3 +18,7 @@
 
 (defmethod store ((db-class t))
   (update-records-from-instance db-class))
+
+(defun find-object (class id)
+  (caar (clsql:select class :where [= [slot-value class 'id]
+				id])))

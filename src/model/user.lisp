@@ -3,7 +3,7 @@
 (def-view-class user ()
   ((id :accessor id 
        :initarg :id
-       :initform (sequence-next 'user-id-seq)
+       :initform (sequence-next "user-id-seq")
        :type integer 
        :db-kind :key 
        :db-constraints (:not-null))
