@@ -20,6 +20,7 @@
 			 (:module :model
 				  :components
 				  ((:file "package")
+				   (:file "model")
 				   (:file "user")))
 			 (:module :frontend
 				  :components

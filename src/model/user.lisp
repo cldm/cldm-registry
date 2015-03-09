@@ -3,7 +3,7 @@
 (def-view-class user ()
   ((id :accessor id 
        :initarg :id
-       :initform 1
+       :initform (sequence-next 'user-id-seq)
        :type integer 
        :db-kind :key 
        :db-constraints (:not-null))
@@ -29,4 +29,5 @@
 		 :type string)
    (registration-time :initarg :registration-time
 		      :accessor registration-time
-		      :initform (get-time))))
+		      :initform (get-time)))
+  (:base-table "registry-user"))
