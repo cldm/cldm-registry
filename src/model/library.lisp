@@ -73,6 +73,11 @@
                   :initform (get-time)
                   :type wall-time)))
 
+(defmethod initialize-instance :after ((library library) &rest initargs)
+  (when (stringp (cld library))
+    (setf (cld library)
+	  (cldm::parse-cld-address (cld library)))))
+
 (def-view-class library-version ()
   ((id :accessor id
        :initarg :id
@@ -136,3 +141,64 @@
              :accessor suggests
              :documentation "List of requirements the library suggests"
              :type list)))
+
+(defmethod initialize-instance :after ((library-version library-version) &rest initargs)
+  (setf (version library-version) (cldm::read-version-from-string (version library-version)))
+  (setf (repositories library-version)
+	(mapcar #'cldm::unparse-repository (repositories library-version))))
+
+
+(defun library-versions (library)
+  #.(locally-enable-sql-reader-syntax)
+  (sort 
+   (select 'library-version :where 
+	   [= [slot-value 'library-version 'library]
+	   (id library)])
+   #'semver:version<)
+  #.(locally-disable-sql-reader-syntax))
+
+(defun find-library-by-name (name)
+  #.(locally-enable-sql-reader-syntax)
+  (caar (select 'library :where
+		[= [slot-value 'library 'name] name]))
+  #.(locally-disable-sql-reader-syntax))
+
+(defun publish (cldm-library)
+  (let ((stored-library (find-library-by-name (cldm::library-name cldm-library))))
+    (if stored-library
+	(let ((library-version (first (cldm::library-versions cldm-library)))
+	      (library-versions (library-versions stored-library)))
+	  ;; If the library version to publish already exists, or is inferior
+	  ;; to the currently published one, error
+	  (if (or (member (cldm::version library-version) library-versions
+			  :key #'semver:version
+			  :test #'semver:version=)
+		  (semver:version< (cldm::version library-version)
+				   (first library-versions)))
+	      (error "Invalid version ~A" library-version))
+	  ;; Update the current library
+	  (setf (description stored-library)
+		(cldm::library-description cldm-library))
+	  (setf (cld stored-library) (cldm::library-cld cldm-library))
+	  (setf (licence stored-library) (cldm::library-licence cldm-library))
+	  (setf (keywords stored-library) (cldm::library-keywords cldm-library)))
+	;; else, create the library
+	(let ((library (make-instance 'library 
+				      :name (cldm::library-name cldm-library)
+				      :cld (cldm::library-cld cldm-library)
+				      :description (cldm::library-description cldm-library)
+				      :keywords (cldm::library-keywords cldm-library)
+				      :licence (cldm::library-licence cldm-library))))
+	  (store library)
+	  (let* ((cldm-library-version (first (cldm::library-versions cldm-library)))
+		 (library-version (make-instance 'library-version
+						 :library library
+						 :libraryid (id library)
+						 :description (cldm::description cldm-library-version)
+						 :stability (cldm::stability cldm-library-version)
+						 :version (cldm::version cldm-library-version)
+						 :repositories (cldm::repositories cldm-library-version))))
+	    (store library-version))))))
+				       
+				      
+	

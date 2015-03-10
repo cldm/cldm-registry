@@ -5,12 +5,10 @@
 (defparameter +db-user+ "postgres")
 (defparameter +db-pass+ "postgres")
 
-(enable-sql-reader-syntax)
-
 (defun connect-db ()
   (connect (list +db-host+ +db-name+ +db-user+ +db-pass+)
 	   :database-type :postgresql :if-exists :new)
-  (setf clsql:*DEFAULT-CACHING* nil))
+  (setf *DEFAULT-CACHING* nil))
 
 (defun create-schema ()
   (create-view-from-class 'user)
@@ -26,8 +24,10 @@
   (update-records-from-instance db-class))
 
 (defun find-object (class id)
-  (caar (clsql:select class :where [= [slot-value class 'id]
-				id])))
+  #.(locally-enable-sql-reader-syntax)
+  (caar (select class :where [= [slot-value class 'id]
+		id]))
+  #.(locally-disable-sql-reader-syntax))
 
 (defun parse-library (librarydef)
   (destructuring-bind (deflibrary name &body options) librarydef
