@@ -1,19 +1,14 @@
 (in-package :cldm-registry.model)
 
-(def-view-class category ()
-  ((id :accessor id 
-       :initarg :id
-       :initform (sequence-next "category-id-seq")
-       :type integer 
-       :db-kind :key 
-       :db-constraints (:not-null))
-   (name :initarg :name
-	 :accessor name
-	 :initform nil
-	 :type string
-	 :db-constraints (:not-null)
-	 :db-kind :key)
-   (description :initarg :description
-	     :accessor description
-	     :initform nil
-	     :type string)))
+(defun create-category (&key name description)
+  (let ((category (make-document)))
+    (add-element "uuid" (princ-to-string (uuid:make-v4-uuid)) category)
+    (add-element "name" name category)
+    (add-element "description" description category)
+    (db.insert "categories" category)))
+
+(defun list-all-categories ()
+  (docs (db.find "categories" :all)))
+
+(defun find-category (uuid)
+  (first (docs (db.find "categories" (kv "uuid" uuid)))))

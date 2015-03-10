@@ -7,11 +7,12 @@
   :depends-on (#:cldm
                #:cl-who
                #:hunchentoot
-               #:clsql-postgresql
+               #:cl-mongo
 	       #:parenscript
 	       #:babel
 	       #:ironclad
-	       #:cl-smtp)
+	       #:cl-smtp
+	       #:uuid)
   :serial t
   :components ((:module :src
 			:components

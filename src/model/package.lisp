@@ -1,2 +1,2 @@
 (defpackage cldm-registry.model
-  (:use :cl :cldm-registry :clsql))
+  (:use :cl :cldm-registry :cl-mongo))

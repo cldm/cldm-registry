@@ -1,35 +1,14 @@
 (in-package :cldm-registry.model)
 
-(defparameter +db-host+ "localhost")
-(defparameter +db-name+ "cldm-registry")
-(defparameter +db-user+ "postgres")
-(defparameter +db-pass+ "postgres")
+(defparameter +mongo+ "cldm-registry")
+(defparameter +users+ "users")
+(defparameter +libraries+ "libraries")
+(defparameter +versions+ "versions")
 
-(defun connect-db ()
-  (connect (list +db-host+ +db-name+ +db-user+ +db-pass+)
-	   :database-type :postgresql :if-exists :new)
-  (setf *DEFAULT-CACHING* nil))
 
-(defun create-schema ()
-  (create-view-from-class 'user)
-  (create-sequence "user-id-seq")
-  (create-view-from-class 'category)
-  (create-sequence "category-id-seq")
-  (create-view-from-class 'library)
-  (create-sequence "library-id-seq")
-  (create-view-from-class 'library-version)
-  (create-sequence "library-version-id-seq"))
 
-(defmethod store ((db-class t))
-  (update-records-from-instance db-class))
 
-(defun find-object (class id)
-  #.(locally-enable-sql-reader-syntax)
-  (caar (select class :where [= [slot-value class 'id]
-		id]))
-  #.(locally-disable-sql-reader-syntax))
-
-(defun parse-library (librarydef)
+#+nil(defun parse-library (librarydef)
   (destructuring-bind (deflibrary name &body options) librarydef
     (assert (or (equalp deflibrary 'cldm:deflibrary)
 		(equalp deflibrary 'cl-user::deflibrary)))
