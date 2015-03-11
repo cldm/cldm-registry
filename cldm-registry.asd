@@ -12,7 +12,8 @@
 	       #:babel
 	       #:ironclad
 	       #:cl-smtp
-	       #:uuid)
+	       #:uuid
+	       #:anaphora)
   :serial t
   :components ((:module :src
 			:components
