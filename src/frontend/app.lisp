@@ -10,10 +10,11 @@
   (restas:start '#:cldm-registry.frontend :hostname host
 		:port port))
 
-(push (hunchentoot:create-folder-dispatcher-and-handler 
-       "/static/"
-       (asdf:system-relative-pathname :cldm-registry "src/frontend/static/"))
-      hunchentoot:*dispatch-table*)
+(restas:mount-module -static- (#:restas.directory-publisher)
+  (:url "/static/")
+  (restas.directory-publisher:*directory* 
+   (asdf:system-relative-pathname :cldm-registry "src/frontend/static/"))
+  (restas.directory-publisher:*autoindex* t))
 
 (defun call-with-frontend-common (function)
   (who:with-html-output-to-string (*html*)

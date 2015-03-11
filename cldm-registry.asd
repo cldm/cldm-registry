@@ -14,6 +14,7 @@
 	       #:uuid
 	       #:anaphora
 	       #:restas
+	       #:restas-directory-publisher
 	       #:djula
 	       #:cl-forms
 	       #:rest-server)
