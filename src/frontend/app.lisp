@@ -45,7 +45,8 @@
 (restas:define-route main ("")
   (with-frontend-common
     (:a :href "/registration" (who:str "Register"))
-    (:a :href "/libraries" (who:str "Libraries"))))
+    (:a :href "/libraries" (who:str "Libraries"))
+    (:a :href "/login/github" (who:str "Github login"))))
 
 (restas:define-route registration-handler ("/registration")
   (with-frontend-common

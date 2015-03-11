@@ -18,7 +18,8 @@
 	       #:djula
 	       #:cl-forms
 	       #:rest-server
-	       #:cl-secure-read)
+	       #:cl-secure-read
+	       #:cl-json)
   :serial t
   :components ((:module :src
 			:components
@@ -36,4 +37,5 @@
 				  ((:file "package")
 				   (:file "encrypt")
 				   (:file "app")
-				   (:file "libraries")))))))
+				   (:file "libraries")
+				   (:file "github")))))))
