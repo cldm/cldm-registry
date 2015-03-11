@@ -5,10 +5,7 @@
 (defparameter +libraries+ "libraries")
 (defparameter +versions+ "versions")
 
-
-
-
-#+nil(defun parse-library (librarydef)
+(defun parse-library (librarydef)
   (destructuring-bind (deflibrary name &body options) librarydef
     (assert (or (equalp deflibrary 'cldm:deflibrary)
 		(equalp deflibrary 'cl-user::deflibrary)))
