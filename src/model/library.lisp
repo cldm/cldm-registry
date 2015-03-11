@@ -109,9 +109,9 @@
   (let ((versions
 	 (mapcar #'load-library-version 
 		 (docs (db.find "versions" 
-				(kv "libraryuuid" (uuid library)))))))
+				(kv "libraryuuid" (uuid library)) :limit 0)))))
     (sort versions
-	  #'semver:version<
+	  #'semver:version>
 	  :key #'version)))
 
 (defclass library-version (mongo-model)
@@ -161,6 +161,11 @@
              :documentation "List of requirements the library suggests"
              :type list)))
 
+(defmethod print-object ((library-version library-version) stream)
+  (print-unreadable-object (library-version stream :type t :identity t)
+    (format stream "~A-~A" (name (library library-version))
+	    (semver:print-version-to-string (version library-version)))))
+
 (defun save-library-version (library-version)
   (let ((doc (or (doc library-version)
 		 (make-document))))
@@ -185,6 +190,7 @@
 		 :id (get-element "_id" doc)
 		 :uuid (get-element "uuid" doc)
 		 :library (find-library (get-element "libraryuuid" doc))
+		 :version (semver:read-version-from-string (get-element "version" doc))
 		 :stability (get-element "stability" doc)
 		 :description (get-element "description" doc)
 		 :repositories (mapcar #'decode-repository 
@@ -220,12 +226,15 @@
 	       
 	  ;; If the library version to publish already exists, or is inferior
 	  ;; to the currently published one, error
-	  (when (or (member (cldm::version cldm-library-version) library-versions
+	  (when (member (cldm::version cldm-library-version) library-versions
 			    :key #'version
 			    :test #'semver:version=)
-		    (semver:version< (cldm::version cldm-library-version)
-				     (version (first library-versions))))
-	    (error "Invalid version ~A" cldm-library-version))
+	    (error "Version ~A of ~A already exists" 
+		   (cldm::version cldm-library-version)
+		   stored-library))
+	  (when (semver:version< (cldm::version cldm-library-version)
+				     (version (first library-versions)))
+	    (error "Version is too old ~A" cldm-library-version))
 	  ;; Update the current library
 	  (setf (description stored-library)
 		(cldm::library-description cldm-library))
@@ -237,6 +246,7 @@
 						:description (cldm::description cldm-library-version)
 						:stability (cldm::stability cldm-library-version)
 						:dependencies (cldm::dependencies cldm-library-version)
+						:repositories (cldm::repositories cldm-library-version)
 						:library stored-library)))
 	    (save-library stored-library)
 	    (save-library-version library-version)))
@@ -257,5 +267,3 @@
 						 :repositories (cldm::repositories cldm-library-version)
 						 :dependencies (cldm::dependencies cldm-library-version))))
 	    (store library-version))))))
-				 
-			 
