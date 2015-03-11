@@ -17,7 +17,8 @@
 	       #:restas-directory-publisher
 	       #:djula
 	       #:cl-forms
-	       #:rest-server)
+	       #:rest-server
+	       #:cl-secure-read)
   :serial t
   :components ((:module :src
 			:components
