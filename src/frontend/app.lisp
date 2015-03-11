@@ -6,9 +6,9 @@
 (defparameter *html* nil)
 
 (defun start (&optional (host +host+) (port +port+))
-  (hunchentoot:start (make-instance 'hunchentoot:easy-acceptor
-				    :address host
-				    :port port)))
+  (model::connect-db)
+  (restas:start '#:cldm-registry.frontend :hostname host
+		:port port))
 
 (push (hunchentoot:create-folder-dispatcher-and-handler 
        "/static/"
@@ -41,11 +41,12 @@
 (defmacro with-frontend-common (&body body)
   `(call-with-frontend-common (lambda () (with-html ,@body))))
 
-(hunchentoot:define-easy-handler (index-handler :uri "/") ()
+(restas:define-route main ("")
   (with-frontend-common
-    (:h1 "Hello world")))
+    (:a :href "/registration" (who:str "Register"))
+    (:a :href "/libraries" (who:str "Libraries"))))
 
-(hunchentoot:define-easy-handler (registration-handler :uri "/registration") ()
+(restas:define-route registration-handler ("/registration")
   (with-frontend-common
     (:h1 "Register")
     (:form :action "/register" :method "POST"
@@ -64,7 +65,7 @@
 	   (:div :class "form-group"
 		 (:input :type "submit" :value "Register")))))
 
-(hunchentoot:define-easy-handler (register-handler :uri "/register") ()
+(restas:define-route register-handler ("/register")
     (let ((username (hunchentoot:post-parameter "username"))
 	  (email (hunchentoot:post-parameter "email"))
 	  (password (hunchentoot:post-parameter "password"))
@@ -86,14 +87,14 @@
 	(with-frontend-common 
 	  (:p (who:fmt "An email for account validation has been sent to ~A" email))))))
 
-(hunchentoot:define-easy-handler (validate-account-handler :uri "/validate-account")
-    (k)
-  (let ((account (decode-string k)))
-    (if (not account)
-	(with-frontend-common
-	  (:p (who:str "Invalid registration key")))
-	;; else
-	(progn
-	  ;; Create the account here
+(restas:define-route validate-account-handler ("/validate-account")
+  (let ((k (hunchentoot:get-parameter "k")))
+    (let ((account (decode-string k)))
+      (if (not account)
 	  (with-frontend-common
-	    (:p (who:fmt "Your account has been created ~S" account)))))))
+	    (:p (who:str "Invalid registration key")))
+	  ;; else
+	  (progn
+	    ;; Create the account here
+	    (with-frontend-common
+	      (:p (who:fmt "Your account has been created ~S" account))))))))

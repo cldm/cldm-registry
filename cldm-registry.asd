@@ -6,14 +6,17 @@
   :license "MIT"
   :depends-on (#:cldm
                #:cl-who
-               #:hunchentoot
-               #:cl-mongo
+	       #:cl-mongo
 	       #:parenscript
 	       #:babel
 	       #:ironclad
 	       #:cl-smtp
 	       #:uuid
-	       #:anaphora)
+	       #:anaphora
+	       #:restas
+	       #:djula
+	       #:cl-forms
+	       #:rest-server)
   :serial t
   :components ((:module :src
 			:components
@@ -30,4 +33,5 @@
 				  :components
 				  ((:file "package")
 				   (:file "encrypt")
-				   (:file "app")))))))
+				   (:file "app")
+				   (:file "libraries")))))))

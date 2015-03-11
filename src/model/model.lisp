@@ -5,6 +5,9 @@
 (defparameter +libraries+ "libraries")
 (defparameter +versions+ "versions")
 
+(defun connect-db ()
+  (db.use +mongo+))
+
 (defun parse-library (librarydef)
   (destructuring-bind (deflibrary name &body options) librarydef
     (assert (or (equalp deflibrary 'cldm:deflibrary)

@@ -3,8 +3,7 @@
 (defclass mongo-model ()
   ((id :accessor id
        :initarg :id
-       :initform nil
-       :type integer)
+       :initform nil)
    (doc :initarg :doc
 	:accessor doc
 	:initform nil)	
@@ -57,7 +56,7 @@
 
 (defun load-library (doc)
   (make-instance 'library 
-		 :id (get-element "_id" doc)
+		 :id (get-element :_id doc)
 		 :uuid (get-element "uuid" doc)
 		 :name (get-element "name" doc)
 		 :description (get-element "description" doc)
@@ -90,6 +89,12 @@
 	  (add-element "uuid" (uuid library) doc)
 	  (db.insert "libraries" doc)
 	  (setf (doc library) doc)))))
+
+(defun remove-library (library)
+  (let ((library-versions (library-versions library)))
+    (db.delete "libraries" (doc library))
+    (loop for version in library-versions
+	 do (db.delete "versions" (doc version)))))
 
 (defmethod store ((library library))
   (save-library library))
@@ -187,7 +192,7 @@
 
 (defun load-library-version (doc)
   (make-instance 'library-version 
-		 :id (get-element "_id" doc)
+		 :id (get-element :_id doc)
 		 :uuid (get-element "uuid" doc)
 		 :library (find-library (get-element "libraryuuid" doc))
 		 :version (semver:read-version-from-string (get-element "version" doc))
@@ -241,6 +246,8 @@
 	  (setf (cld stored-library) (cldm::library-cld cldm-library))
 	  (setf (licence stored-library) (cldm::library-licence cldm-library))
 	  (setf (keywords stored-library) (cldm::library-keywords cldm-library))
+	  (setf (author stored-library) (cldm::library-author cldm-library))
+	  (setf (maintainer stored-library) (cldm::library-maintainer cldm-library))
 	  (let ((library-version (make-instance 'library-version
 						:version (cldm::version cldm-library-version)
 						:description (cldm::description cldm-library-version)
@@ -256,7 +263,9 @@
 				      :cld (cldm::library-cld cldm-library)
 				      :description (cldm::library-description cldm-library)
 				      :keywords (cldm::library-keywords cldm-library)
-				      :licence (cldm::library-licence cldm-library))))
+				      :licence (cldm::library-licence cldm-library)
+				      :author (cldm::library-author cldm-library)
+				      :maintainer (cldm::library-maintainer cldm-library))))
 	  (store library)
 	  (let* ((cldm-library-version (first (cldm::library-versions cldm-library)))
 		 (library-version (make-instance 'library-version
