@@ -171,6 +171,17 @@
     (format stream "~A-~A" (name (library library-version))
 	    (semver:print-version-to-string (version library-version)))))
 
+(defun find-library-version (&rest args)
+  (if (equalp (length args) 1)
+      (db.find +versions+ (kv "uuid" (first args)))
+      (destructuring-bind (name version) args
+	(let ((library (find-library-by-name name))
+	      (version (semver:read-version-from-string version)))
+	  (find-if (lambda (v)
+		     (semver:version= (version v)
+				      version))
+		   (library-versions library))))))			      
+
 (defun save-library-version (library-version)
   (let ((doc (or (doc library-version)
 		 (make-document))))
