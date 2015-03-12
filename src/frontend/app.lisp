@@ -5,6 +5,16 @@
 
 (defparameter *html* nil)
 
+(defparameter *user* nil "The logged user")
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defmacro with-html (&body body)
+    `(who:with-html-output (*html*)
+       ,@body))
+
+  (defmacro with-frontend-common (&body body)
+    `(call-with-frontend-common (lambda () (with-html ,@body)))))
+
 (defun start (&optional (host +host+) (port +port+))
   (model::connect-db)
   (restas:start '#:cldm-registry.frontend :hostname host
@@ -15,6 +25,29 @@
   (restas.directory-publisher:*directory* 
    (asdf:system-relative-pathname :cldm-registry "src/frontend/static/"))
   (restas.directory-publisher:*autoindex* t))
+
+(defun navbar ()
+  (with-html
+    (:div :class "navbar navbar-default"
+	  (:div :class "container"
+		(:a :class "navbar-brand" :href "#" (who:str "CLDM registry"))
+		(:ul :class "nav navbar-nav"
+		     (:li :class "active" (:a :href "#" (who:str "Home")))
+		     (:li (:a :href (restas:genurl 'libraries-handler)
+			      (who:str "Browse")))
+		     (if *user*
+			 (who:htm (:li (:a :href (restas:genurl 'account-handler 
+								:name (model::username *user*))
+					   (who:str (model::realname *user*)))))
+			 (progn
+			   (who:htm (:li (:a :href (restas:genurl 'login-handler)
+					     (who:str "Sign up"))))
+			   (who:htm (:li (:a :href (restas:genurl 'registration-handler)
+					     (who:str "Register"))))))
+		     (:li :class "divider-vertical")
+		     (when *user*
+		       (who:htm (:li (:a :href (restas:genurl 'logout)
+					 (who:str "Logout"))))))))))
 
 (defun call-with-frontend-common (function)
   (who:with-html-output-to-string (*html*)
@@ -33,20 +66,12 @@
 	       :src "/static/bower_components/jquery/dist/jquery.min.js")
       (:script :type "javascript" :src "/static/bower_components/bootstrap/dist/js/bootstrap.min.js"))
      (:body
+      (navbar)
       (funcall function)))))
-
-(defmacro with-html (&body body)
-  `(who:with-html-output (*html*)
-     ,@body))
-
-(defmacro with-frontend-common (&body body)
-  `(call-with-frontend-common (lambda () (with-html ,@body))))
 
 (restas:define-route main ("")
   (with-frontend-common
-    (:a :href "/registration" (who:str "Register"))
-    (:a :href "/libraries" (who:str "Libraries"))
-    (:a :href "/login/github" (who:str "Github login"))))
+    ))
 
 (restas:define-route registration-handler ("/registration")
   (with-frontend-common
@@ -66,6 +91,10 @@
 		 (:input :name "realname" :class "form-control" :type "text" :placeholader "Enter realname"))
 	   (:div :class "form-group"
 		 (:input :type "submit" :value "Register")))))
+
+(restas:define-route login-handler ("/login")
+  (with-frontend-common
+    (:a :href "/login/github" (who:str "Github login"))))
 
 (restas:define-route register-handler ("/register")
     (let ((username (hunchentoot:post-parameter "username"))
