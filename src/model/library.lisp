@@ -287,3 +287,23 @@
 						 :repositories (cldm::repositories cldm-library-version)
 						 :dependencies (cldm::dependencies cldm-library-version))))
 	    (store library-version))))))
+
+(defun print-library-definition (library &optional stream)
+  (let ((*print-case* :downcase))
+    (format stream "~S" (library-definition library))))
+
+(defun library-definition (library)
+  `(cldm:deflibrary ,(intern (string-upcase (name library)))
+     :cld ,(cldm::unparse-cld-address (cld library))
+     :description ,(description library)
+     :author ,(author library)
+     :licence ,(licence library)
+     :versions ,(mapcar #'library-version-definition (library-versions library))))
+
+(defun library-version-definition (library-version)
+  `(:version ,(semver:print-version-to-string (version library-version))
+	     :repositories ,(mapcar #'cldm::unparse-library-version-repository
+				    (repositories library-version))
+	     :depends-on ,(mapcar #'cldm::print-requirement-to-string 
+				  (dependencies library-version))))
+
