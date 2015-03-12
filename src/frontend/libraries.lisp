@@ -41,5 +41,10 @@
 	  (:h1 (who:str (print-library-version-to-string library-version)))
 	  (:p (who:str (model::description library-version)))))))
 
-    
-	  
+(restas:define-route library-cld-handler ("/libraries/:(name).cld")
+  (let ((library (model::find-library-by-name name)))
+    (if (not library)
+	hunchentoot:+http-not-found+
+	(progn
+	  (setf (hunchentoot:header-out "Content-Type") "text")
+	  (model::print-library-definition library)))))
