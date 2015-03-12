@@ -37,7 +37,10 @@
             :type string)
    (creation-time :initarg :creation-time
                   :accessor creation-time
-                  :initform (now))))
+                  :initform (now))
+   (update-time :initarg :update-time
+		:accessor update-time
+		:initform (now))))
 
 (defmethod print-object ((library library) stream)
   (print-unreadable-object (library stream :type t :identity t)
@@ -57,6 +60,8 @@
 		 :licence (get-element "licence" doc)
 		 :author (get-element "author" doc)
 		 :maintainer (get-element "maintainer" doc)
+		 :creation-time (get-element "creation-time" doc)
+		 :update-time (get-element "update-time" doc)
 		 :doc doc))
 
 (defun save-library (library)
@@ -72,6 +77,7 @@
     (add-element "licence" (licence library) doc)
     (add-element "author" (author library) doc)
     (add-element "maintainer" (maintainer library) doc)
+    (add-element "update-time" (now) doc)
     (if (doc library)
 	(db.save "libraries" doc)
 	(progn
@@ -153,7 +159,10 @@
              :initform nil
              :accessor suggests
              :documentation "List of requirements the library suggests"
-             :type list)))
+             :type list)
+   (creation-time :initarg :creation-time
+		  :initform (now)
+		  :accessor creation-time))))
 
 (defmethod print-object ((library-version library-version) stream)
   (print-unreadable-object (library-version stream :type t :identity t)
@@ -255,8 +264,8 @@
 						:dependencies (cldm::dependencies cldm-library-version)
 						:repositories (cldm::repositories cldm-library-version)
 						:library stored-library)))
-	    (save-library stored-library)
-	    (save-library-version library-version)))
+	    (store stored-library)
+	    (store library-version)))
 	;; else, create the library
 	(let ((library (make-instance 'library 
 				      :name (cldm::library-name cldm-library)
@@ -295,4 +304,3 @@
 				    (repositories library-version))
 	     :depends-on ,(mapcar #'cldm::print-requirement-to-string 
 				  (dependencies library-version))))
-
