@@ -4,7 +4,7 @@
   (format nil "libraries/~A" (model::name library)))
 
 (restas:define-route libraries-handler ("/libraries")
-  (with-frontend-common
+  (with-frontend-common (:active :browse)
     (:ul
      (loop for library in (model::list-all-libraries)
 	  do
@@ -21,7 +21,7 @@
   (let ((library (model::find-library-by-name name)))
     (if (not library)
 	hunchentoot:+http-not-found+
-	(with-frontend-common
+	(with-frontend-common (:active :browse)
 	  (:h1 (who:str name))
 	  (:p (who:str (model::description library)))
 	  (:p (who:fmt "Author: ~A" (model::author library)))
@@ -40,7 +40,7 @@
   (let ((library-version (model::find-library-version name version)))
     (if (not library-version)
 	hunchentoot:+http-not-found+
-	(with-frontend-common
+	(with-frontend-common (:active :browse)
 	  (:h1 (who:str (print-library-version-to-string library-version)))
 	  (:p (who:str (model::description library-version)))))))
 

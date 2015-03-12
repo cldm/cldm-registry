@@ -12,8 +12,8 @@
     `(who:with-html-output (*html*)
        ,@body))
 
-  (defmacro with-frontend-common (&body body)
-    `(call-with-frontend-common (lambda () (with-html ,@body)))))
+  (defmacro with-frontend-common (args &body body)
+    `(call-with-frontend-common (lambda () (with-html ,@body)) ,@args)))
 
 (defun start (&optional (host +host+) (port +port+))
   (model::connect-db)
@@ -26,30 +26,36 @@
    (asdf:system-relative-pathname :cldm-registry "src/frontend/static/"))
   (restas.directory-publisher:*autoindex* t))
 
-(defun navbar ()
+(defun navbar (&key active)
   (with-html
     (:div :class "navbar navbar-default"
 	  (:div :class "container"
-		(:a :class "navbar-brand" :href "#" (who:str "CLDM registry"))
+		(:a :class "navbar-brand" :href "/" (who:str "CLDM registry"))
 		(:ul :class "nav navbar-nav"
-		     (:li :class "active" (:a :href "#" (who:str "Home")))
-		     (:li (:a :href (restas:genurl 'libraries-handler)
+		     (:li :class (and (equalp active :home) "active")
+			  (:a :href "/" (who:str "Home")))
+		     (:li :class (and (equalp active :browse) "active")
+			  (:a :href (restas:genurl 'libraries-handler)
 			      (who:str "Browse")))
 		     (if *user*
-			 (who:htm (:li (:a :href (restas:genurl 'account-handler 
-								:name (model::username *user*))
-					   (who:str (model::realname *user*)))))
+			 (who:htm (:li 
+				   :class (and (equalp active :account) "active")
+				   (:a :href (restas:genurl 'account-handler 
+							    :name (model::username *user*))
+				       (who:str (model::realname *user*)))))
 			 (progn
-			   (who:htm (:li (:a :href (restas:genurl 'login-handler)
+			   (who:htm (:li :class (and (equalp active :login) "active")
+					 (:a :href (restas:genurl 'login-handler)
 					     (who:str "Sign up"))))
-			   (who:htm (:li (:a :href (restas:genurl 'registration-handler)
+			   (who:htm (:li :class (and (equalp active :register) "active")
+					 (:a :href (restas:genurl 'registration-handler)
 					     (who:str "Register"))))))
 		     (:li :class "divider-vertical")
 		     (when *user*
 		       (who:htm (:li (:a :href (restas:genurl 'logout)
 					 (who:str "Logout"))))))))))
 
-(defun call-with-frontend-common (function)
+(defun call-with-frontend-common (function &rest args)
   (who:with-html-output-to-string (*html*)
     (:html
      (:head
@@ -66,15 +72,19 @@
 	       :src "/static/bower_components/jquery/dist/jquery.min.js")
       (:script :type "javascript" :src "/static/bower_components/bootstrap/dist/js/bootstrap.min.js"))
      (:body
-      (navbar)
+      (apply #'navbar args)
       (funcall function)))))
 
 (restas:define-route main ("")
-  (with-frontend-common
+  (with-frontend-common (:active :home)
     ))
 
+(restas:define-route login-handler ("/login")
+  (with-frontend-common (:active :login)
+    (:a :href "/login/github" (who:str "Github login"))))
+
 (restas:define-route registration-handler ("/registration")
-  (with-frontend-common
+  (with-frontend-common (:active :register)
     (:h1 "Register")
     (:form :action "/register" :method "POST"
 	   (:div :class "form-group"
@@ -91,10 +101,6 @@
 		 (:input :name "realname" :class "form-control" :type "text" :placeholader "Enter realname"))
 	   (:div :class "form-group"
 		 (:input :type "submit" :value "Register")))))
-
-(restas:define-route login-handler ("/login")
-  (with-frontend-common
-    (:a :href "/login/github" (who:str "Github login"))))
 
 (restas:define-route register-handler ("/register")
     (let ((username (hunchentoot:post-parameter "username"))
@@ -115,17 +121,17 @@
 			    email 
 			    "Confirm CLDM acccount" 
 			    message)
-	(with-frontend-common 
+	(with-frontend-common () 
 	  (:p (who:fmt "An email for account validation has been sent to ~A" email))))))
 
 (restas:define-route validate-account-handler ("/validate-account")
   (let ((k (hunchentoot:get-parameter "k")))
     (let ((account (decode-string k)))
       (if (not account)
-	  (with-frontend-common
+	  (with-frontend-common ()
 	    (:p (who:str "Invalid registration key")))
 	  ;; else
 	  (progn
 	    ;; Create the account here
-	    (with-frontend-common
+	    (with-frontend-common ()
 	      (:p (who:fmt "Your account has been created ~S" account))))))))
