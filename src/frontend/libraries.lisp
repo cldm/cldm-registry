@@ -26,6 +26,9 @@
 	  (:p (who:str (model::description library)))
 	  (:p (who:fmt "Author: ~A" (model::author library)))
 	  (:p (who:fmt "Licence: ~A" (model::licence library)))
+	  (:p (who:str "CLD: ")
+	      (:a :href (restas:genurl 'library-cld-handler :name name)
+		  (who:fmt "~A.cld" name)))
 	  (:ul (loop for library-version in (model::library-versions library)
 		    do (who:htm
 			(:li (:a :href (restas:genurl 'library-version-handler 
