@@ -190,11 +190,15 @@
     (add-element "description" (description library-version) doc)
     (add-element "repositories" (mapcar #'encode-repository (repositories library-version)) doc)
     (add-element "dependencies" (mapcar #'encode-requirement (dependencies library-version)) doc)
+    (add-element "creation-time" (creation-time library-version) doc)
     (if (doc library-version)
 	(db.save "versions" doc)
 	(progn
 	  (db.insert "versions" doc)
-	  (setf (doc library-version) doc)))))
+	  (setf (doc library-version) doc)))
+    ;; Add the library version to the published library versions collection
+    (db.insert "published-library-versions" doc)
+    library-version))
 
 (defmethod store ((library-version library-version))
   (save-library-version library-version))
@@ -304,3 +308,8 @@
 				    (repositories library-version))
 	     :depends-on ,(mapcar #'cldm::print-requirement-to-string 
 				  (dependencies library-version))))
+
+(defun latest-library-versions (&key (limit 10))
+  (db.sort "published-library-versions" :all 
+	   :field "creation-time"
+	   :limit limit))
