@@ -66,10 +66,10 @@
 	     :href "/static/favicon.ico")
       (:link :rel "stylesheet"
 	     :href "/static/style.css")
+      (:link :rel "stylesheet" :href "/static/bower_components/bootstrap/dist/css/bootstrap.min.css")
+      ;(:link :rel "stylesheet" :href "/static/bower_components/bootstrap/dist/css/bootstrap-theme.min.css")
       (:link :rel "stylesheet"
 	     :href "/static/theme.css")
-      ;(:link :rel "stylesheet" :href "/static/bower_components/bootstrap/dist/css/bootstrap.min.css")
-      (:link :rel "stylesheet" :href "/static/bower_components/bootstrap/dist/css/bootstrap-theme.min.css")
       (:script :type "javascript"
 	       :src "/static/bower_components/jquery/dist/jquery.min.js")
       (:script :type "javascript" :src "/static/bower_components/bootstrap/dist/js/bootstrap.min.js"))
