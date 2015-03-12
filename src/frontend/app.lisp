@@ -73,11 +73,31 @@
       (:script :type "javascript" :src "/static/bower_components/bootstrap/dist/js/bootstrap.min.js"))
      (:body
       (apply #'navbar args)
-      (funcall function)))))
+      (:div :class "container"
+	    (funcall function))))))
 
 (restas:define-route main ("")
   (with-frontend-common (:active :home)
-    ))
+    (:div :class "jumbotron text-center"
+	  (:h1 (who:str "Common Lisp Dependency Manager registry"))
+	  (:p :class "lead" (who:str "CLDM is a distributed dependency manager for Common Lisp"))
+	  (:p (:a :class "btn btn-large btn-success" 
+		  :href (restas:genurl 'libraries-handler)
+		  (who:str "Browse the libraries"))))
+    (:div :class "row"
+	  (:div :class "col-lg-6"
+		(:h4 (who:str "Distributed"))
+		(:p (who:str "Distributed by design"))
+      
+		(:h4 (who:str "Versions constraints"))
+		(:p (who:str "Uses a Pseudo Boolean Expressions solver to manage version constraints")))
+    
+	  (:div :class "col-lg-6"
+		(:h4 (who:str "VCS support"))
+		(:p (who:str "Supports different Version Control Systems like Git, Darcs, Subversion, etc"))
+      
+		(:h4 (who:str "API"))
+		(:p (who:str "Publish and manage your libraries via the API and the CLDM command line tool"))))))
 
 (restas:define-route login-handler ("/login")
   (with-frontend-common (:active :login)
