@@ -275,19 +275,25 @@
 		 (cl-smtp:send-email "localhost" 
 				     "noreply@cldm.org" 
 				     email 
-				     "Confirm CLDM acccount" 
+				     "Confirm CLDM registry acccount" 
 				     message)
 		 (with-frontend-common () 
 		   (:p (who:fmt "An email for account validation has been sent to ~A" email)))))))))))
 
 (restas:define-route validate-account-handler ("/validate-account")
   (let ((k (hunchentoot:get-parameter "k")))
-    (let ((account (decode-string k)))
+    (let ((account (read-from-string (decode-string k))))
       (if (not account)
 	  (with-frontend-common ()
 	    (:p (who:str "Invalid registration key")))
 	  ;; else
 	  (progn
-	    ;; Create the account here
-	    (with-frontend-common ()
-	      (:p (who:fmt "Your account has been created ~S" account))))))))
+	    ;; Create the user account
+	    (let ((user (make-instance 'model::user
+				       :username (getf account :username)
+				       :password (getf account :password)
+				       :email (getf account :email)
+				       :realname (getf account :realname))))
+	      (model::store user)
+	      (setf (hunchentoot:session-value :user) user)
+	      (restas:redirect 'main)))))))
