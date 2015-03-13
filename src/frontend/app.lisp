@@ -144,45 +144,46 @@
 
 (defun render-account-page (form)
   (with-frontend-common ()
-    (:h1 (who:str "Your account"))
-    (forms:with-form-renderer :who
-      (let ((forms.who::*html* *html*))
-	(forms:with-form form
-	  (forms:render-form-errors)
-	  (forms:render-form-start)
-	  (with-html
-	    (:div :class "form-group"
-		  (forms:render-field-label 'username form :for "username")
-		  (forms:render-field-widget 'username form 
-					     :class "form-control col-lg-1"
-					     :placeholder "Enter username"))
-	    (:div :class "form-group"
-		  (forms::render-field-label 'email form :for "email")
-		  (forms:render-field-widget 'email form 
-					     :class "form-control col-lg-1"
-					     :placeholder "Enter an email"))
-	    (:div :class "form-group"
-		  (forms::render-field-label 'password form :for "password")
-		  (forms:render-field-widget 'password form
-					     :class "form-control col-lg-1" 
-					     :placeholader "Enter password"))
-	    (:div :class "form-group"
-		  (forms::render-field-label 'confirm-password form
-					     :for "confirm password")
-		  (forms:render-field-widget 'confirm-password form
-					     :class "form-control col-lg-1" 
-					     :placeholader "Confirm password"))
+    (:div :class "row" :style  "margin: 0 auto; width:50%"
+	  (:h1 (who:str "Your account"))
+	  (forms:with-form-renderer :who
+	    (let ((forms.who::*html* *html*))
+	      (forms:with-form form
+		(forms:render-form-errors)
+		(forms:render-form-start)
+		(with-html
+		  (:div :class "form-group"
+			(forms:render-field-label 'username form :for "username")
+			(forms:render-field-widget 'username form 
+						   :class "form-control col-lg-1"
+						   :placeholder "Enter username"))
+		  (:div :class "form-group"
+			(forms::render-field-label 'email form :for "email")
+			(forms:render-field-widget 'email form 
+						   :class "form-control col-lg-1"
+						   :placeholder "Enter an email"))
+		  (:div :class "form-group"
+			(forms::render-field-label 'password form :for "password")
+			(forms:render-field-widget 'password form
+						   :class "form-control col-lg-1" 
+						   :placeholader "Enter password"))
+		  (:div :class "form-group"
+			(forms::render-field-label 'confirm-password form
+						   :for "confirm password")
+			(forms:render-field-widget 'confirm-password form
+						   :class "form-control col-lg-1" 
+						   :placeholader "Confirm password"))
 
-	    (:div :class "form-group"
-		  (forms::render-field-label 'realname form :for "realname")
-		  (forms:render-field-widget 'realname form 
-					     :class "form-control col-lg-1"
-					     :placeholder "Enter realname"))
-	    (:div :class "form-group"
-		  (forms:render-field-widget 'submit)))
-	  (forms:render-form-end))))
-    (:h1 "API token")
-    (:p (:pre (:code (who:str (model::api-token *user*)))))))
+		  (:div :class "form-group"
+			(forms::render-field-label 'realname form :for "realname")
+			(forms:render-field-widget 'realname form 
+						   :class "form-control col-lg-1"
+						   :placeholder "Enter realname"))
+		  (:div :class "form-group"
+			(forms:render-field-widget 'submit)))
+		(forms:render-form-end))))
+	  (:h1 "API token")
+	  (:p (:pre (:code (who:str (model::api-token *user*))))))))
 
 (restas:define-route account-handler ("/account")
   (:decorators '@logged-user)
