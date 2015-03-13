@@ -19,7 +19,8 @@
 	       #:cl-forms.who
 	       #:rest-server
 	       #:cl-secure-read
-	       #:cl-json)
+	       #:cl-json
+	       #:session-token)
   :serial t
   :components ((:module :src
 			:components

@@ -13,6 +13,9 @@
    (realname :initarg :realname
 	     :accessor realname
 	     :initform nil)
+   (api-token :initarg :api-token
+	      :accessor api-token
+	      :initform (generate-api-token))
    (github-user :initarg :github-user
 		:accessor github-user
 		:initform nil)
@@ -33,7 +36,9 @@
 		 :password (get-element "password" doc)
 		 :email (get-element "email" doc)
 		 :realname (get-element "realname" doc)
-		 :github-user (get-element "github-user" doc)))
+		 :api-token (get-element "api-token" doc)
+		 :github-user (get-element "github-user" doc)
+		 :doc doc))
 
 (defun validate-user (user)
   (let ((errors nil))
@@ -76,6 +81,7 @@
     (add-element "password" (password user) doc)
     (add-element "email" (email user) doc)
     (add-element "realname" (realname user) doc)
+    (add-element "api-token" (generate-api-token) doc)
     (add-element "github-user" (github-user user) doc)
 
     (if (doc user)
@@ -84,6 +90,10 @@
 	  (add-element "uuid" (uuid user) doc)
 	  (db.insert "users" doc)
 	  (setf (doc user) doc)))))
+
+(let ((generator (session-token:make-generator)))
+  (defun generate-api-token ()
+    (funcall generator)))
 
 (defun list-all-users ()
   (mapcar #'load-user (docs (db.find +users+ :all))))
