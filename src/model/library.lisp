@@ -159,10 +159,7 @@
              :initform nil
              :accessor suggests
              :documentation "List of requirements the library suggests"
-             :type list)
-   (creation-time :initarg :creation-time
-		  :initform (now)
-		  :accessor creation-time))))
+             :type list)))
 
 (defmethod print-object ((library-version library-version) stream)
   (print-unreadable-object (library-version stream :type t :identity t)
@@ -178,7 +175,7 @@
 	  (find-if (lambda (v)
 		     (semver:version= (version v)
 				      version))
-		   (library-versions library))))))			      
+		   (library-versions library))))))
 
 (defun save-library-version (library-version)
   (let ((doc (or (doc library-version)

@@ -16,7 +16,7 @@
 	       #:restas
 	       #:restas-directory-publisher
 	       #:djula
-	       #:cl-forms
+	       #:cl-forms.who
 	       #:rest-server
 	       #:cl-secure-read
 	       #:cl-json)

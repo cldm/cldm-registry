@@ -30,5 +30,5 @@
 					     :additional-headers (list (cons "Authorization" (format nil "token ~A" access-token)))
 					     :want-stream t)))
 	    (let ((user-data (json:decode-json stream)))
-	      (with-frontend-common
+	      (with-frontend-common ()
 		(who:str (prin1-to-string user-data))))))))))
