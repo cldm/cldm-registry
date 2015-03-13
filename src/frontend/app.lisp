@@ -5,6 +5,9 @@
 
 (defparameter *html* nil)
 
+(defparameter +smtp-host+ "localhost")
+(defparameter +email-from+ "noreply@cldm.org")
+
 (defparameter *user* nil "The logged user")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
@@ -272,8 +275,8 @@
 						    +port+
 						    user-key))
 		      (message (format nil "You have requested a CLDM repository account.~%~%Visit this link to confirm: ~A" validate-account-url)))
-		 (cl-smtp:send-email "localhost" 
-				     "noreply@cldm.org" 
+		 (cl-smtp:send-email +smtp-host+
+				     +email-from+
 				     email 
 				     "Confirm CLDM registry account" 
 				     message)
