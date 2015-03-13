@@ -46,10 +46,11 @@
     (values (not errors) errors))))
 
 (defmethod initialize-instance :after ((user user) &rest initargs)
+  (declare (ignore initargs))
   (multiple-value-bind (valid-p errors)
       (validate-user user)
     (when (not valid-p)
-      (error "User is invalid: ~A~%~A" user errors))))
+      (clavier:validation-error "User is invalid: ~A~%~A" user errors))))
 
 (defun save-user (user)
   (when (not (doc user))

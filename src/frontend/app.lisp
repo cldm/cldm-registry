@@ -185,30 +185,35 @@
 	  (forms:with-form-field-values (username email password 
 						  confirm-password realname) 
 	      form
-	    (if (not (string= password confirm-password))
-		(progn
-		  (push (cons (forms::get-field form 'confirm-password)
-			      (list "Passwords don't match"))
-			(forms::form-errors form))
-		  (render-registration-page form))
-		;; else, valid form
-	      
-		(let* ((user-key (user-key :username username
-					   :email email
-					   :password password
-					   :realname realname))
-		       (validate-account-url (format nil "http://~A:~A/validate-account?k=~A"
-						     +host+
-						     +port+
-						     user-key))
-		       (message (format nil "You have requested a CLDM repository account.~%~%Visit this link to confirm: ~A" validate-account-url)))
-		  (cl-smtp:send-email "localhost" 
-				      "noreply@cldm.org" 
-				      email 
-				      "Confirm CLDM acccount" 
-				      message)
-		  (with-frontend-common () 
-		    (:p (who:fmt "An email for account validation has been sent to ~A" email))))))))))
+	    (cond 
+	      ((model::find-user-by-username username)
+	       (push (cons (forms::get-field form 'username)
+			   (list "Username already taken. Choose another."))
+		     (forms::form-errors form))
+	       (render-registration-page form))
+	      ((not (string= password confirm-password))
+	       (push (cons (forms::get-field form 'confirm-password)
+			   (list "Passwords don't match"))
+		     (forms::form-errors form))
+	       (render-registration-page form))
+	      ;; else, valid form
+	      (t
+	       (let* ((user-key (user-key :username username
+					  :email email
+					  :password password
+					  :realname realname))
+		      (validate-account-url (format nil "http://~A:~A/validate-account?k=~A"
+						    +host+
+						    +port+
+						    user-key))
+		      (message (format nil "You have requested a CLDM repository account.~%~%Visit this link to confirm: ~A" validate-account-url)))
+		 (cl-smtp:send-email "localhost" 
+				     "noreply@cldm.org" 
+				     email 
+				     "Confirm CLDM acccount" 
+				     message)
+		 (with-frontend-common () 
+		   (:p (who:fmt "An email for account validation has been sent to ~A" email)))))))))))
 
 (restas:define-route validate-account-handler ("/validate-account")
   (let ((k (hunchentoot:get-parameter "k")))
