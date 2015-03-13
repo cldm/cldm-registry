@@ -85,5 +85,18 @@
   (awhen (first (docs (db.find +users+ (kv "username" username))))
     (load-user it)))
 
+(defun find-user-by-email (email)
+  (awhen (first (docs (db.find +users+ (kv "email" email))))
+    (load-user it)))
+
+(defun user-login (username-or-email password)
+  (awhen (first (docs (db.find +users+ ($and
+					($or (kv "username" username-or-email)
+					     (kv "email" username-or-email))
+					(kv "password" password)))))
+    (load-user it)))
+
 (defmethod store ((user user))
   (save-user user))
+
+

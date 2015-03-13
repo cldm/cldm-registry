@@ -46,7 +46,7 @@
 			 (progn
 			   (who:htm (:li :class (and (equalp active :login) "active")
 					 (:a :href (restas:genurl 'login-handler)
-					     (who:str "Sign up"))))
+					     (who:str "Login"))))
 			   (who:htm (:li :class (and (equalp active :register) "active")
 					 (:a :href (restas:genurl 'registration-handler)
 					     (who:str "Register"))))))
@@ -56,32 +56,33 @@
 					 (who:str "Logout"))))))))))
 
 (defun call-with-frontend-common (function &rest args)
-  (who:with-html-output-to-string (*html*)
-    (write-string "<!DOCTYPE html>" *html*)
-    (who:htm
-     (:html
-      (:head
-       (:title "CLDM registry")
-       (:meta :http-equiv "Content-Type"
-	      :content "text/html; charset=UTF-8")
-       (:link :rel "shortcut icon"
-	      :href "/static/favicon.ico")
-       (:link :rel "stylesheet"
-	      :href "/static/style.css")
-       (:link :rel "stylesheet" :href "/static/bower_components/bootstrap/dist/css/bootstrap.min.css")
+  (let ((*user* (hunchentoot:session-value :user)))
+    (who:with-html-output-to-string (*html*)
+      (write-string "<!DOCTYPE html>" *html*)
+      (who:htm
+       (:html
+	(:head
+	 (:title "CLDM registry")
+	 (:meta :http-equiv "Content-Type"
+		:content "text/html; charset=UTF-8")
+	 (:link :rel "shortcut icon"
+		:href "/static/favicon.ico")
+	 (:link :rel "stylesheet"
+		:href "/static/style.css")
+	 (:link :rel "stylesheet" :href "/static/bower_components/bootstrap/dist/css/bootstrap.min.css")
 					;(:link :rel "stylesheet" :href "/static/bower_components/bootstrap/dist/css/bootstrap-theme.min.css")
-       (:link :rel "stylesheet"
-	      :href "/static/theme.css"))
-      (:body
-       (:script :type "text/javascript"
-		:src "/static/bower_components/jquery/dist/jquery.min.js")
-       (:script :type "text/javascript" :src "/static/bower_components/bootstrap/dist/js/bootstrap.min.js")
-       (:script :type "text/javascript" :src "/static/bower_components/parsleyjs/dist/parsley.js")
-       (apply #'navbar args)
-       (:div :class "container"
-	     (funcall function))
-       (:footer
-	(render-footer)))))))
+	 (:link :rel "stylesheet"
+		:href "/static/theme.css"))
+	(:body
+	 (:script :type "text/javascript"
+		  :src "/static/bower_components/jquery/dist/jquery.min.js")
+	 (:script :type "text/javascript" :src "/static/bower_components/bootstrap/dist/js/bootstrap.min.js")
+	 (:script :type "text/javascript" :src "/static/bower_components/parsleyjs/dist/parsley.js")
+	 (apply #'navbar args)
+	 (:div :class "container"
+	       (funcall function))
+	 (:footer
+	  (render-footer))))))))
 
 (defun render-footer ()
   (with-html
@@ -117,9 +118,73 @@
 		(:h4 (who:str "API"))
 		(:p (who:str "Publish and manage your libraries via the API and the CLDM command line tool"))))))
 
-(restas:define-route login-handler ("/login")
+(restas:define-route account-handler ("/account")
+  )
+
+(restas:define-route logout ("/logout")
+  (setf (hunchentoot:session-value :user) nil)
+  (restas:redirect 'main))
+
+(forms:defform login-form (:action (restas:genurl 'login-action)
+					  :method :post)
+  ((username-or-email :string :label "Username or email" :required-p t)
+   (password :password :label "Password" :required-p t)
+   (submit :submit :label "Login")))
+
+(defun render-login-form (form &optional errors)
   (with-frontend-common (:active :login)
-    (:a :href "/login/github" (who:str "Github login"))))
+    (:div :class "row" :style  "margin: 0 auto; width:50%"
+	  (:h1 "Login")
+	  (forms:with-form-renderer :who
+	    (let ((forms.who::*html* *html*))
+	      (forms:with-form form
+		(when errors
+		  (with-html
+		    (:ul
+		     (loop for error in errors
+			do (who:htm (:li (who:str error)))))))
+		(forms:render-form-errors)
+		(forms:render-form-start)
+		(with-html
+		  (:div :class "form-group"
+			(forms:render-field-label 'username-or-email form :for "username-or-email")
+			(forms:render-field-widget 'username-or-email form 
+						   :class "form-control col-lg-1"
+						   :placeholder "Enter username or email"))
+		  (:div :class "form-group"
+			(forms::render-field-label 'password form :for "password")
+			(forms:render-field-widget 'password form
+						   :class "form-control col-lg-1" 
+						   :placeholader "Enter password"))
+		  (:div :class "form-group"
+			(forms:render-field-widget 'submit)))
+		(forms:render-form-end))))
+	  (:a :class "btn btn-large btn-success" 
+	      :href (restas:genurl 'github-login) 
+	      (who:str "Login with Github")))))
+
+(restas:define-route login-handler ("/login")
+  (let ((form (forms:get-form 'login-form)))
+    (render-login-form form)))
+
+(restas:define-route login-action ("/login" :method :post)
+  (let ((form (forms:get-form 'login-form)))
+    (forms:with-form form
+      (forms:handle-request)
+      (if (not (forms:validate-form))
+	  ;; invalid form
+	  (render-login-form form)
+	  ;; else
+	  (forms:with-form-field-values (username-or-email password) 
+	      form
+	    (let ((user (model::user-login username-or-email password)))
+	    (if (not user)
+		;; invalid login
+		(render-login-form form (list "Invalid username or password"))
+		;; else, succesful login
+		(progn
+		  (setf (hunchentoot:session-value :user) user)
+		  (restas:redirect 'main)))))))))
 
 (forms:defform registration-form (:action (restas:genurl 'register-handler)
 					  :method :post)
