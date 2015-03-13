@@ -79,7 +79,20 @@
        (:script :type "text/javascript" :src "/static/bower_components/parsleyjs/dist/parsley.js")
        (apply #'navbar args)
        (:div :class "container"
-	     (funcall function)))))))
+	     (funcall function))
+       (:footer
+	(render-footer)))))))
+
+(defun render-footer ()
+  (with-html
+    (:div :class "row"
+	  (:div :class "col-md-2")
+	  (:div :class "col-md-2"
+		(:p (:a :href "https://github.com/mmontone" (who:str "© Mariano Montone"))
+		    (who:str "  2015")))
+	  (:div :class "col-md-2"
+		(:ul (:li (:a :href "http://cldm.github.io/cldm" (who:str "CLDM")))
+		     (:li (:a :href "https://github.com/cldm/cldm-registry" (who:str "CLDM Registry"))))))))
 
 (restas:define-route main ("")
   (with-frontend-common (:active :home)
