@@ -75,7 +75,9 @@
 	 (:link :rel "stylesheet" :href "/static/bower_components/bootstrap/dist/css/bootstrap.min.css")
 					;(:link :rel "stylesheet" :href "/static/bower_components/bootstrap/dist/css/bootstrap-theme.min.css")
 	 (:link :rel "stylesheet"
-		:href "/static/theme.css"))
+		:href "/static/theme.css")
+	 (:link :rel "stylesheet"
+		:href "/static/bower_components/parsleyjs/src/parsley.css"))
 	(:body
 	 (:script :type "text/javascript"
 		  :src "/static/bower_components/jquery/dist/jquery.min.js")
