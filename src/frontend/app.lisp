@@ -275,7 +275,7 @@
 		 (cl-smtp:send-email "localhost" 
 				     "noreply@cldm.org" 
 				     email 
-				     "Confirm CLDM registry acccount" 
+				     "Confirm CLDM registry account" 
 				     message)
 		 (with-frontend-common () 
 		   (:p (who:fmt "An email for account validation has been sent to ~A" email)))))))))))
