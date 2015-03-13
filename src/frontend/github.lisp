@@ -30,5 +30,21 @@
 					     :additional-headers (list (cons "Authorization" (format nil "token ~A" access-token)))
 					     :want-stream t)))
 	    (let ((user-data (json:decode-json stream)))
-	      (with-frontend-common ()
-		(who:str (prin1-to-string user-data))))))))))
+	      (let ((user (model::github-user-login 
+			   (cdr (assoc :login user-data)))))
+		(if user
+		    ; the github user is registered, login
+		    (progn
+		      (setf (model::github-token user) access-token)
+		      (setf (hunchentoot:session-value :user) user)
+		      (restas:redirect 'main))
+		    ; else, user not registered, register and login
+		    (let ((user (make-instance 'model::user
+					       :username (cdr (assoc :login user-data))
+					       :email (cdr (assoc :email user-data))
+					       :realname (cdr (assoc :name user-data))
+					       :github-user t
+					       :github-token access-token)))
+		      (model::store user)
+		      (setf (hunchentoot:session-value :user) user)
+		      (restas:redirect 'main)))))))))))

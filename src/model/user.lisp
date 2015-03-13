@@ -12,7 +12,14 @@
 	  :initform nil)
    (realname :initarg :realname
 	     :accessor realname
-	     :initform nil)))
+	     :initform nil)
+   (github-user :initarg :github-user
+		:accessor github-user
+		:initform nil)
+   (github-token :initarg :github-token
+		 :accessor github-token
+		 :initform nil
+		 :documentation "Github token. For user session. Not persisted")))
 
 (defmethod print-object ((user user) stream)
   (print-unreadable-object (user stream :type t :identity t)
@@ -25,25 +32,28 @@
 		 :username (get-element "username" doc)
 		 :password (get-element "password" doc)
 		 :email (get-element "email" doc)
-		 :realname (get-element "realname" doc)))
+		 :realname (get-element "realname" doc)
+		 :github-user (get-element "github-user" doc)))
 
 (defun validate-user (user)
   (let ((errors nil))
     (flet ((verror (msg)
 	     (push msg errors)))
-    (if (null (username user))
-      (verror "Username required")
-      (when (not (stringp (username user)))
-	(verror "Invalid username")))
-    (if (null (password user))
-	(verror "Password required")
-	(when (not (stringp (password user)))
-	  (verror "Invalid password")))
-    (if (null (email user))
-	(verror "Email required")
-	(when (not (funcall (clavier:valid-email) (email user)))
-	  (verror "Invalid email")))
-    (values (not errors) errors))))
+      (if (null (username user))
+	  (verror "Username required")
+	  (when (not (stringp (username user)))
+	    (verror "Invalid username")))
+      (when (not (github-user user))
+	(if (null (password user))
+	    (verror "Password required")
+	    (when (not (stringp (password user)))
+	      (verror "Invalid password"))))
+      (when (not (github-user user))
+	(if (null (email user))
+	    (verror "Email required")
+	    (when (not (funcall (clavier:valid-email) (email user)))
+	      (verror "Invalid email"))))
+      (values (not errors) errors))))
 
 (defmethod initialize-instance :after ((user user) &rest initargs)
   (declare (ignore initargs))
@@ -66,6 +76,7 @@
     (add-element "password" (password user) doc)
     (add-element "email" (email user) doc)
     (add-element "realname" (realname user) doc)
+    (add-element "github-user" (github-user user) doc)
 
     (if (doc user)
 	(db.save "users" doc)
@@ -91,12 +102,17 @@
 
 (defun user-login (username-or-email password)
   (awhen (first (docs (db.find +users+ ($and
+					(kv "github-user" nil)
 					($or (kv "username" username-or-email)
 					     (kv "email" username-or-email))
 					(kv "password" password)))))
     (load-user it)))
 
+(defun github-user-login (username)
+  (awhen (first (docs (db.find +users+ ($and
+					(kv "github-user" t)
+					(kv "username" username)))))
+    (load-user it)))
+
 (defmethod store ((user user))
   (save-user user))
-
-
