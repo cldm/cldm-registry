@@ -50,7 +50,18 @@
 			(forms:render-field-widget 'submit)))
 		(forms:render-form-end))))
 	  (:h1 "API token")
-	  (:p (:pre (:code (who:str (model::api-token *user*))))))))
+	  (:p (:pre (:code (who:str (model::api-token *user*)))))
+	  (:h1 "Your libraries")
+	  (let ((libraries (model::published-libraries *user*)))
+	    (if (not libraries)
+		(who:htm (:h3 (who:str "You have no libraries")))
+		(who:htm 
+		 (:ul
+		  (loop for library in libraries
+		     do
+		       (who:htm (:li (:a :href (restas:genurl 'library-handler :name (model::name library))
+					 (who:str (model::name library)))))))))))))
+
 
 (restas:define-route account-handler ("/account")
   (:decorators '@logged-user)
