@@ -48,7 +48,7 @@
 		     (:li :class (and (member active (list :browse :libraries))
 				      "active")
 			  (:a :href (restas:genurl 'libraries-handler)
-			      (who:str "Browse")))
+			      (who:str "Libraries")))
 		     (:li :class (and (equalp active :users) "active")
 			  (:a :href (restas:genurl 'users-handler)
 			      (who:str "Users"))))
