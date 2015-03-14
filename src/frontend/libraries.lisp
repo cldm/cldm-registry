@@ -11,7 +11,7 @@
         do
           (who:htm
            (:li (:a :href (library-url library) (who:str (model::name library)))
-                (:p (model::description library))))))))
+                (who:fmt " - ~A" (model::description library))))))))
 
 (defun print-library-version-to-string (library-version)
   (format nil "~A-~A" (model::name (model::library library-version))
