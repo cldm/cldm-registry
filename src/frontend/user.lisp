@@ -25,7 +25,7 @@
       (:h2 (who:str "Published libraries"))
       (:ul
        (loop for library in (model::published-libraries user)
-	    do (who:htm (:li 
-			 (:a :href (restas:genurl 'library-handler :name (model::name library))
-			     (who:str (model::name library))))))))))
-    
+	  do (who:htm (:li (:a :href (restas:genurl 'library-handler
+						    :name (model::name library))
+			       (who:str (model::name library)))
+			   (who:fmt " - ~A" (model::description library)))))))))

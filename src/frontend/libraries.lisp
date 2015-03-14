@@ -1,8 +1,5 @@
 (in-package :cldm-registry.frontend)
 
-(defun library-url (library)
-  (format nil "libraries/~A" (model::name library)))
-
 (restas:define-route libraries-handler ("/libraries")
   (with-frontend-common (:active :browse)
     (:h1 (who:str "Libraries"))
@@ -10,7 +7,8 @@
      (loop for library in (model::list-all-libraries)
         do
           (who:htm
-           (:li (:a :href (library-url library) (who:str (model::name library)))
+           (:li (:a :href (restas:genurl 'library-handler :name (model::name library))
+		    (who:str (model::name library)))
                 (who:fmt " - ~A" (model::description library))))))))
 
 (defun print-library-version-to-string (library-version)
@@ -18,7 +16,7 @@
           (semver:print-version-to-string
            (model::version library-version))))
 
-(restas:define-route  library-handler ("/libraries/:name")
+(restas:define-route library-handler ("/libraries/:name")
   (let ((library (model::find-library-by-name name)))
     (if (not library)
         hunchentoot:+http-not-found+
