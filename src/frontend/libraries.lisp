@@ -85,11 +85,17 @@
 
 (defun render-library-versions (library)
   (with-html
-    (:div :class "panel-group"
-          :id "versions" :role "tablist"
-          :aria-multiselectable "true"
-          (loop for library-version in (model::library-versions library)
-             do (render-library-version library-version)))))
+    (:h3 (who:str "Versions:"))
+    (:ul :id "versions"
+	 (loop for library-version in (model::library-versions library)
+	    do (who:htm 
+		(:li (:a :href (restas:genurl 'library-version-handler
+					      :name (model::name (model::library library-version))
+					      :version (semver:print-version-to-string
+							(model::version library-version)))
+			 (who:str (print-library-version-to-string library-version)))
+		     (who:fmt " - ~A" (mongo::fmt (model::creation-time library-version) nil))
+		     ))))))
 
 (defun render-library-version (library-version)
   (let ((version (semver:print-version-to-string
@@ -147,6 +153,10 @@
 		  (:h1 (who:str (print-library-version-to-string library-version)))
 		  (:p (who:str (model::description library-version)))
 		  (:p (who:str (model::description library)))
+		  (:p (:b (who:str "Library: "))
+		      (:a :href (restas:genurl 'library-handler
+					       :name (model::name library))
+			  (who:str (model::name library))))
 		  (:p (:b (who:str "Author: ")) (who:fmt "~A" (model::author library)))
 		  (:p (:b (who:str "Categories: "))
 		      (let ((categories (model::categories library)))
