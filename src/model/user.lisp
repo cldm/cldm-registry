@@ -28,12 +28,19 @@
   (print-unreadable-object (user stream :type t :identity t)
     (format stream "~A" (username user))))
 
+(defun encode-password (password)
+  (cldm-registry.common::encode-string password))
+
+(defun decode-password (password)
+  (cldm-registry.common::decode-string password))
+
 (defun load-user (doc)
   (make-instance 'user
 		 :id (get-element :_id doc)
 		 :uuid (get-element "uuid" doc)
 		 :username (get-element "username" doc)
-		 :password (get-element "password" doc)
+		 :password (decode-password
+			    (get-element "password" doc))
 		 :email (get-element "email" doc)
 		 :realname (get-element "realname" doc)
 		 :api-token (get-element "api-token" doc)
@@ -78,7 +85,8 @@
   (let ((doc (or (doc user)
 		 (make-document))))
     (add-element "username" (username user) doc)
-    (add-element "password" (password user) doc)
+    (add-element "password" (encode-password
+			     (password user)) doc)
     (add-element "email" (email user) doc)
     (add-element "realname" (realname user) doc)
     (add-element "api-token" (generate-api-token) doc)
@@ -119,7 +127,7 @@
 					(kv "github-user" nil)
 					($or (kv "username" username-or-email)
 					     (kv "email" username-or-email))
-					(kv "password" password)))))
+					(kv "password" (encode-password password))))))
     (load-user it)))
 
 (defun github-user-login (username)

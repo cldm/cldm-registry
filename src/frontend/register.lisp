@@ -99,7 +99,7 @@
 
 (restas:define-route validate-account-handler ("/validate-account")
   (let ((k (hunchentoot:get-parameter "k")))
-    (let ((account (read-from-string (decode-string k))))
+    (let ((account (decode-key k)))
       (if (not account)
 	  (with-frontend-common ()
 	    (:p (who:str "Invalid registration key")))
@@ -124,5 +124,5 @@
 					       email
 					       realname)))
 
-(defun decode-token (token)
+(defun decode-key (token)
   (ignore-errors (read-from-string (cldm-registry.common::decode-string token))))
