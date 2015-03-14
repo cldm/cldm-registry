@@ -87,15 +87,3 @@
      (cl-base64:base64-string-to-usb8-array b64-str
                                             :uri t)))
    nil))
-
-(register-key "zgpaZoegGAbg3G480jn340fnsS3ia")
-
-(defun user-key (&key username password email realname)
-  (encode-string (format nil "(:username ~s :password ~s :email ~s :realname ~s)"
-                         username
-			 password
-			 email
-			 realname)))
-
-(defun decode-token (token)
-  (ignore-errors (read-from-string (decode-string token))))

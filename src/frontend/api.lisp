@@ -16,7 +16,9 @@
 
 (restas:define-route api/publish ("/api/publish" :method :post)
   (:decorators '@api-auth)
-  (let ((data (hunchentoot:raw-post-data :force-text t)))
+  (let ((data (hunchentoot:raw-post-data :force-text t))
+	(force-p (hunchentoot:get-parameter "force"))
+	(preview-p (hunchentoot:get-parameter "preview")))
     (let ((cld (model::read-library-from-string data)))
       (json:encode-json-to-string (list :published (get-universal-time))))))
 
