@@ -107,7 +107,9 @@
   (let ((*user* (hunchentoot:session-value :user)))
     (if *user*
 	(call-next-method)
-	hunchentoot:+http-forbidden+)))
+	(progn
+	  (setf (hunchentoot:return-code*)  hunchentoot:+http-forbidden+)
+	  nil))))
 
 (defun @logged-user (route)
   (make-instance 'logged-user-route :target route))

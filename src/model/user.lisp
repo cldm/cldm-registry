@@ -110,6 +110,10 @@
   (awhen (first (docs (db.find +users+ (kv "email" email))))
     (load-user it)))
 
+(defun find-user-by-api-token (api-token)
+  (awhen (first (docs (db.find +users+ (kv "api-token" api-token))))
+    (load-user it)))
+
 (defun user-login (username-or-email password)
   (awhen (first (docs (db.find +users+ ($and
 					(kv "github-user" nil)

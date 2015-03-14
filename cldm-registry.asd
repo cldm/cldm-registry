@@ -15,12 +15,12 @@
 	       #:anaphora
 	       #:restas
 	       #:restas-directory-publisher
-	       #:djula
+	       ;#:djula
 	       #:cl-forms.who
-	       #:rest-server
 	       #:cl-secure-read
 	       #:cl-json
-	       #:session-token)
+	       #:session-token
+	       #:montezuma)
   :serial t
   :components ((:module :src
 			:components
@@ -39,4 +39,5 @@
 				   (:file "encrypt")
 				   (:file "app")
 				   (:file "libraries")
-				   (:file "github")))))))
+				   (:file "github")
+				   (:file "api")))))))
