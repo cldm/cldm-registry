@@ -26,6 +26,13 @@
    (asdf:system-relative-pathname :cldm-registry "src/frontend/static/"))
   (restas.directory-publisher:*autoindex* t))
 
+;; Glyphicons fonts path hack. How to remove?
+(restas:mount-module -fonts- (#:restas.directory-publisher)
+  (:url "/fonts/")
+  (restas.directory-publisher:*directory* 
+   (asdf:system-relative-pathname :cldm-registry "src/frontend/static/bower_components/bootstrap/dist/fonts/"))
+  (restas.directory-publisher:*autoindex* t))
+
 (defclass logged-user-route (routes:proxy-route) ())
 
 (defmethod restas:process-route :around ((route logged-user-route) bindings)
@@ -44,15 +51,28 @@
 		(:a :class "navbar-brand" :href "/" (who:str "CLDM registry"))
 		(:ul :class "nav navbar-nav"
 		     (:li :class (and (equalp active :home) "active")
-			  (:a :href "/" (who:str "Home")))
+			  (:a :href (restas:genurl 'main) 
+			      (:span :class "glyphicon glyphicon-home")
+			      (who:str " Home")))
 		     (:li :class (and (member active (list :browse :libraries))
 				      "active")
 			  (:a :href (restas:genurl 'libraries-handler)
 			      (who:str "Libraries")))
 		     (:li :class (and (equalp active :users) "active")
 			  (:a :href (restas:genurl 'users-handler)
-			      (who:str "Users"))))
+			      (:span :class "glyphicon glyphicon-user")
+			      (who:str " Users"))))
 		(:ul :class "nav navbar-nav navbar-right"
+		     (:li
+		      (:form :class "navbar-form" :role "search"
+			     (:div :class "input-group"
+				   (:input :type "text" :class "form-control" 
+					   :placeholder "Search" :name "term"
+					   :id "srch-term"
+					   (:div :class "input-group-btn"
+						 (:button :class "btn btn-default" 
+							  :type "submit"
+							  (:i :class "glyphicon glyphicon-search")))))))
 		     (if *user*
 			 (who:htm (:li 
 				   :class (and (equalp active :account) "active")

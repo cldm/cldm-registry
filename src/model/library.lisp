@@ -90,7 +90,10 @@
 	  (add-element "uuid" (uuid library) doc)
 	  (add-element "creation-time" (now) doc)
 	  (db.insert "libraries" doc)
-	  (setf (doc library) doc)))))
+	  (setf (doc library) doc)
+	  (montezuma:add-document-to-index *search-index*
+					   (build-search-document library))
+	  library))))
 
 (defun remove-library (library)
   (let ((library-versions (library-versions library)))
@@ -368,3 +371,11 @@
 
 (defun read-library-from-string (str)
   (parse-library (secure-read-from-string str)))
+
+(defun build-search-document (library)
+  (list (cons "name" (model::name library))
+        (cons "author" (model::author library))
+	(cons "description" (model::description library))
+	(cons "licence" (model::licence library))
+	(cons "keywords" (model::keywords library))
+	(cons "categories" (model::categories library))))
