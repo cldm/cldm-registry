@@ -26,6 +26,17 @@
    (asdf:system-relative-pathname :cldm-registry "src/frontend/static/"))
   (restas.directory-publisher:*autoindex* t))
 
+(defclass logged-user-route (routes:proxy-route) ())
+
+(defmethod restas:process-route :around ((route logged-user-route) bindings)
+  (let ((*user* (hunchentoot:session-value :user)))
+    (if *user*
+	(call-next-method)
+	(restas:redirect 'login-handler))))
+
+(defun @logged-user (route)
+  (make-instance 'logged-user-route :target route))
+
 (defun navbar (&key active)
   (with-html
     (:div :class "navbar navbar-default"
@@ -97,19 +108,6 @@
 	  (:div :class "col-md-2"
 		(:ul (:li (:a :href "http://cldm.github.io/cldm" (who:str "CLDM")))
 		     (:li (:a :href "https://github.com/cldm/cldm-registry" (who:str "CLDM Registry"))))))))
-
-(defclass logged-user-route (routes:proxy-route) ())
-
-(defmethod restas:process-route :around ((route logged-user-route) bindings)
-  (let ((*user* (hunchentoot:session-value :user)))
-    (if *user*
-	(call-next-method)
-	(progn
-	  (setf (hunchentoot:return-code*)  hunchentoot:+http-forbidden+)
-	  nil))))
-
-(defun @logged-user (route)
-  (make-instance 'logged-user-route :target route))
 
 (restas:define-route main ("")
   (with-frontend-common (:active :home)
