@@ -47,6 +47,24 @@
 			(who:htm (:a :href (restas:genurl 'keyword-handler :name keyword)
 				     (who:str keyword))))))
                 (:p (:b (who:str "Licence: ")) (who:fmt "~A" (model::licence library)))
+		(let ((latest-version (first (model::library-versions library))))
+		  (who:htm
+		   (:p (:b (who:str "Latest version: "))
+		       (:a :href (restas:genurl 'library-version-handler 
+						:name (model::name library)
+						:version (semver:print-version-to-string 
+							  (model::version latest-version)))
+			   (who:str (semver:print-version-to-string 
+				     (model::version latest-version)))))
+					       
+		   (:p (:b (who:str "Dependencies: "))
+		       (let ((deps (model::dependencies latest-version)))
+			 (loop for dep in (butlast deps)
+			    do
+			      (who:htm (render-requirement dep)
+				       (who:str ", ")))
+			 (let ((dep (car (last deps))))
+			   (render-requirement dep))))))
                 (:p (:b (who:str "CLD: "))
                     (:a :href (restas:genurl 'library-cld-handler :name name)
                         (who:fmt "~A.cld" name))))
@@ -84,6 +102,28 @@
 						 :name (model::name (model::library library-version))
 						 :version version)
 			    (who:str (print-library-version-to-string library-version)))))))))
+
+(defun render-requirement (requirement)
+  (flet ((render-version-constraint (version-constraint)
+	   (when (not (equalp version-constraint :any))
+	     (destructuring-bind (operation version) version-constraint
+	       (with-html
+		 (who:fmt " ~A ~A"
+			  operation
+			  (semver:print-version-to-string version)))))))
+    (with-html
+      (:a :href (restas:genurl 'library-handler :name  (cldm::library-name requirement))
+	  (who:str (cldm::library-name requirement)))
+      (let ((version-constraint (first (cldm::requirement-version-constraints requirement))))
+	(when version-constraint
+	  (render-version-constraint version-constraint)))
+
+      (loop for version-constraint in (rest (cldm::requirement-version-constraints requirement))
+	 do (who:htm
+	     (who:str ", ")
+	     (:a :href (restas:genurl 'library-handler :name  (cldm::library-name requirement))
+		 (who:str (cldm::library-name requirement)))
+	     (render-version-constraint version-constraint))))))
 
 (restas:define-route library-version-handler ("/versions/:name/:version")
   (let ((library-version (model::find-library-version name version)))
