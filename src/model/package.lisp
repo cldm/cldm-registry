@@ -1,3 +1,6 @@
 (defpackage cldm-registry.model
   (:nicknames :model)
-  (:use :cl :cldm-registry :cl-mongo :anaphora))
+  (:use :cl 
+	:cldm-registry.common 
+	:cl-mongo 
+	:anaphora))

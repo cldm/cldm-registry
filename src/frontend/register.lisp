@@ -115,14 +115,14 @@
 	      (setf (hunchentoot:session-value :user) user)
 	      (restas:redirect 'main)))))))
 
-(register-key "zgpaZoegGAbg3G480jn340fnsS3ia")
+(cldm-registry.common::register-key "zgpaZoegGAbg3G480jn340fnsS3ia")
 
 (defun user-key (&key username password email realname)
-  (encode-string (format nil "(:username ~s :password ~s :email ~s :realname ~s)"
-                         username
-			 password
-			 email
-			 realname)))
+  (cldm-registry.common::encode-string (format nil "(:username ~s :password ~s :email ~s :realname ~s)"
+					       username
+					       password
+					       email
+					       realname)))
 
 (defun decode-token (token)
-  (ignore-errors (read-from-string (decode-string token))))
+  (ignore-errors (read-from-string (cldm-registry.common::decode-string token))))

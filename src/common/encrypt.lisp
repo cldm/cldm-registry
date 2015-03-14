@@ -1,4 +1,4 @@
-(in-package :cldm-registry.frontend)
+(in-package :cldm-registry.common)
 
 (defvar *key* nil)
 

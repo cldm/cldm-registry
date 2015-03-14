@@ -24,8 +24,11 @@
   :serial t
   :components ((:module :src
 			:components
-			((:file "package")
-			 (:file "cldm-registry")
+			((:module :common
+				  :components
+				  ((:file "package")
+				   (:file "cldm-registry")
+				   (:file "encrypt")))
 			 (:module :model
 				  :components
 				  ((:file "package")
@@ -36,7 +39,6 @@
 			 (:module :frontend
 				  :components
 				  ((:file "package")
-				   (:file "encrypt")
 				   (:file "app")
 				   (:file "login")
 				   (:file "register")
