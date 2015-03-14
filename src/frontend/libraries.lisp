@@ -73,6 +73,10 @@
 						:username 
 						(model::username publisher))
 			   (who:str (print-user-name publisher))))))
+		(:p (:b (who:str "Published: "))
+		    (who:str (mongo::fmt (model::creation-time library) nil)))
+		(:p (:b (who:str "Last update: "))
+		    (who:str (mongo::fmt (model::update-time library) nil)))
                 (:p (:b (who:str "CLD: "))
                     (:a :href (restas:genurl 'library-cld-handler :name name)
                         (who:fmt "~A.cld" name))))

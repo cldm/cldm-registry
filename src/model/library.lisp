@@ -88,6 +88,7 @@
 	(db.save "libraries" doc)
 	(progn
 	  (add-element "uuid" (uuid library) doc)
+	  (add-element "creation-time" (now) doc)
 	  (db.insert "libraries" doc)
 	  (setf (doc library) doc)))))
 
@@ -243,7 +244,7 @@
 (defun encode-requirement (requirement)
   (cldm::print-requirement-to-string requirement))
 
-(defun publish (cldm-library)
+(defun publish (cldm-library publisher)
   (let ((stored-library (find-library-by-name (cldm::library-name cldm-library))))
     (if stored-library
 	(let ((cldm-library-version (first (cldm::library-versions cldm-library)))
@@ -285,7 +286,8 @@
 				      :keywords (cldm::library-keywords cldm-library)
 				      :licence (cldm::library-licence cldm-library)
 				      :author (cldm::library-author cldm-library)
-				      :maintainer (cldm::library-maintainer cldm-library))))
+				      :maintainer (cldm::library-maintainer cldm-library)
+				      :publisher publisher)))
 	  (store library)
 	  (let* ((cldm-library-version (first (cldm::library-versions cldm-library)))
 		 (library-version (make-instance 'library-version
