@@ -3,7 +3,7 @@
 (defun print-user-name (user)
   (with-output-to-string (s)
     (format s "~A" (model::username user))
-    (when (model::realname user)
+    (when (stringp* (model::realname user))
       (format s " (~A)" (model::realname user)))))
 
 (restas:define-route users-handler ("/users")

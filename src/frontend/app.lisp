@@ -15,6 +15,11 @@
   (defmacro with-frontend-common (args &body body)
     `(call-with-frontend-common (lambda () (with-html ,@body)) ,@args)))
 
+(defun stringp* (str)
+  (and (stringp str)
+       (not (zerop (length str)))
+       str))
+
 (defun start (&optional (host +host+) (port +port+))
   (model::connect-db)
   (restas:start '#:cldm-registry.frontend :hostname host
@@ -79,7 +84,8 @@
 				   :class (and (equalp active :account) "active")
 				   (:a :href (restas:genurl 'account-handler)
 				       (:span :class "glyphicon glyphicon-cog")
-				       (who:fmt " ~A" (model::realname *user*)))))
+				       (who:fmt " ~A" (or (stringp* (model::realname *user*))
+							  (model::username *user*))))))
 			 (progn
 			   (who:htm (:li :class (and (equalp active :login) "active")
 					 (:a :href (restas:genurl 'login-handler)
