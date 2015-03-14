@@ -1,9 +1,10 @@
 {
-    "name": "cldm-registry",
-    "version": "0.0.1",
-    "dependencies": {
-        "jquery" : "*",
-        "bootstrap": "*",
-	"parsleyjs": "*"
-    }
+  "name": "cldm-registry",
+  "version": "0.0.1",
+  "dependencies": {
+    "jquery": "*",
+    "bootstrap": "*",
+    "parsleyjs": "*",
+    "css3-social-signin-buttons": "necolas/css3-social-signin-buttons"
+  }
 }

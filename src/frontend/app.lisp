@@ -76,6 +76,8 @@
 	 (:link :rel "stylesheet"
 		:href "/static/theme.css")
 	 (:link :rel "stylesheet"
+		:href "/static/bower_components/css3-social-signin-buttons/auth-buttons.css")
+	 (:link :rel "stylesheet"
 		:href "/static/bower_components/parsleyjs/src/parsley.css"))
 	(:body
 	 (:script :type "text/javascript"
@@ -267,7 +269,7 @@
 		  (:div :class "form-group"
 			(forms:render-field-widget 'submit)))
 		(forms:render-form-end))))
-	  (:a :class "btn btn-large btn-success" 
+	  (:a :class "btn-auth btn-github large" 
 	      :href (restas:genurl 'github-login) 
 	      (who:str "Login with Github")))))
 
