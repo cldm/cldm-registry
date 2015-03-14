@@ -205,3 +205,18 @@
         (progn
           (setf (hunchentoot:header-out "Content-Type") "text")
           (model::print-library-definition library)))))
+
+(restas:define-route search-handler ("/search" :method :post)
+  (let ((q (hunchentoot:post-parameter "q")))
+    (let ((results (model::search-library (format nil "name:\"~A\"" q))))
+      (with-frontend-common ()
+	(if (not results)
+	    (who:htm (:h1 "No results"))
+	    (who:htm
+	     (:h1 "Search results")
+	     (:ul
+	      (loop for result in results do
+		   (let ((library (cdr (assoc :library result))))
+		     (who:htm (:li (:a :href (restas:genurl 'library-handler :name (model::name library))
+				       (who:str (model::name library)))
+				   (who:fmt " - ~A" (model::description library)))))))))))))

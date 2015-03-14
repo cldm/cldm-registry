@@ -71,9 +71,11 @@
 		(:ul :class "nav navbar-nav navbar-right"
 		     (:li
 		      (:form :class "navbar-form" :role "search"
+			     :action (restas:genurl 'search-handler)
+			     :method :post
 			     (:div :class "input-group"
 				   (:input :type "text" :class "form-control" 
-					   :placeholder "Search" :name "term"
+					   :placeholder "Search" :name "q"
 					   :id "srch-term"
 					   (:div :class "input-group-btn"
 						 (:button :class "btn btn-default" 
