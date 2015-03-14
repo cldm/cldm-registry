@@ -16,5 +16,11 @@
 	 :initarg :uuid
 	 :initform (princ-to-string (uuid:make-v4-uuid)))))
 
+(defmethod make-bson-oid ((oid vector))
+  (mongo::make-bson-oid :oid oid))
+
+(defmethod make-bson-oid ((oid mongo::bson-oid))
+  oid)
+
 (defun connect-db ()
   (db.use +mongo+))

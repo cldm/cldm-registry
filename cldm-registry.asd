@@ -44,6 +44,7 @@
 				   (:file "register")
 				   (:file "account")
 				   (:file "libraries")
+				   (:file "users")
 				   (:file "categories")
 				   (:file "keywords")
 				   (:file "github")

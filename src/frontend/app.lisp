@@ -45,9 +45,14 @@
 		(:ul :class "nav navbar-nav"
 		     (:li :class (and (equalp active :home) "active")
 			  (:a :href "/" (who:str "Home")))
-		     (:li :class (and (equalp active :browse) "active")
+		     (:li :class (and (member active (list :browse :libraries))
+				      "active")
 			  (:a :href (restas:genurl 'libraries-handler)
 			      (who:str "Browse")))
+		     (:li :class (and (equalp active :users) "active")
+			  (:a :href (restas:genurl 'users-handler)
+			      (who:str "Users"))))
+		(:ul :class "nav navbar-nav navbar-right"
 		     (if *user*
 			 (who:htm (:li 
 				   :class (and (equalp active :account) "active")

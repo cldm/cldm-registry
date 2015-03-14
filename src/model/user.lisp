@@ -110,6 +110,10 @@
   (awhen (first (docs (db.find +users+ (kv "uuid" uuid))))
     (load-user it)))
 
+(defun find-user-by-id (id)
+  (awhen (first (docs (db.find +users+ (kv :_id (make-bson-oid id)))))
+    (load-user it)))
+
 (defun find-user-by-username (username)
   (awhen (first (docs (db.find +users+ (kv "username" username))))
     (load-user it)))
@@ -138,3 +142,8 @@
 
 (defmethod store ((user user))
   (save-user user))
+
+(defmethod published-libraries ((user user))
+  (mapcar #'load-library 
+	  (docs
+	   (db.find +libraries+ (kv "publisher" (make-bson-oid (id user)))))))

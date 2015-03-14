@@ -23,7 +23,8 @@
       (json:encode-json-to-string (list :published (get-universal-time))))))
 
 (defun registry-search (q)
-  (list "cldm" "hunchentoot"))
+  (list (list (cons :name "cldm") (cons :score "10"))
+	(list (cons :name "hunchentoot") (cons :score "5"))))
 
 (restas:define-route api/search ("/api/search")
   (:decorators '@api-auth)

@@ -35,6 +35,10 @@
             :accessor licence
             :initform nil
             :type string)
+   (publisher :initarg :publisher
+	      :accessor publisher
+	      :initform nil
+	      :documentation "The cldm-registry user that published the library")
    (creation-time :initarg :creation-time
                   :accessor creation-time
                   :initform (now))
@@ -60,6 +64,7 @@
 		 :licence (get-element "licence" doc)
 		 :author (get-element "author" doc)
 		 :maintainer (get-element "maintainer" doc)
+		 :publisher (find-user-by-id (get-element "publisher" doc))
 		 :creation-time (get-element "creation-time" doc)
 		 :update-time (get-element "update-time" doc)
 		 :doc doc))
@@ -77,6 +82,7 @@
     (add-element "licence" (licence library) doc)
     (add-element "author" (author library) doc)
     (add-element "maintainer" (maintainer library) doc)
+    (add-element "publisher" (make-bson-oid (id (publisher library))) doc)
     (add-element "update-time" (now) doc)
     (if (doc library)
 	(db.save "libraries" doc)
@@ -96,6 +102,10 @@
 
 (defun list-all-libraries ()
   (mapcar #'load-library (docs (db.find "libraries" :all))))
+
+(defun find-library-by-id (id)
+  (awhen (first (docs (db.find "libraries" (kv :_id (make-bson-oid id)))))
+    (load-library it)))
 
 (defun find-library (uuid)
   (awhen (first (docs (db.find "libraries" (kv "uuid" uuid))))

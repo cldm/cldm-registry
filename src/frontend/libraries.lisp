@@ -5,6 +5,7 @@
 
 (restas:define-route libraries-handler ("/libraries")
   (with-frontend-common (:active :browse)
+    (:h1 (who:str "Libraries"))
     (:ul
      (loop for library in (model::list-all-libraries)
         do
@@ -65,6 +66,13 @@
 				       (who:str ", ")))
 			 (let ((dep (car (last deps))))
 			   (render-requirement dep))))))
+		(let ((publisher (model::publisher library)))
+		  (who:htm
+		   (:p (:b (who:str "Publisher: "))
+		       (:a :href (restas:genurl 'user-handler 
+						:username 
+						(model::username publisher))
+			   (who:str (print-user-name publisher))))))
                 (:p (:b (who:str "CLD: "))
                     (:a :href (restas:genurl 'library-cld-handler :name name)
                         (who:fmt "~A.cld" name))))
