@@ -35,6 +35,18 @@
             :accessor licence
             :initform nil
             :type string)
+   (homepage :initarg :homepage
+	     :initform nil
+	     :accessor homepage)
+   (documentation :initarg :documentation
+		  :initform nil
+		  :accessor library-documentation)
+   (bug-reports :initarg :bug-reports
+		:initform nil
+		:accessor bug-reports)
+   (source-repository :initarg :source-repository
+		      :initform nil
+		      :accessor source-repository)   
    (publisher :initarg :publisher
 	      :accessor publisher
 	      :initform nil
@@ -64,6 +76,10 @@
 		 :licence (get-element "licence" doc)
 		 :author (get-element "author" doc)
 		 :maintainer (get-element "maintainer" doc)
+		 :homepage (get-element "homepage" doc)
+		 :bug-reports (get-element "bug-reports" doc)
+		 :documentation (get-element "documentation" doc)
+		 :source-repository (get-element "source-repository" doc)
 		 :publisher (find-user-by-id (get-element "publisher" doc))
 		 :creation-time (get-element "creation-time" doc)
 		 :update-time (get-element "update-time" doc)
@@ -83,6 +99,10 @@
     (add-element "author" (author library) doc)
     (add-element "maintainer" (maintainer library) doc)
     (add-element "publisher" (make-bson-oid (id (publisher library))) doc)
+    (add-element "homepage" (homepage library) doc)
+    (add-element "bug-reports" (bug-reports library) doc)
+    (add-element "documentation" (library-documentation library) doc)
+    (add-element "source-repository" (source-repository library) doc)
     (add-element "update-time" (now) doc)
     (if (doc library)
 	(db.save "libraries" doc)
@@ -149,6 +169,9 @@
                  :initform (error "Provide a repository at least")
                  :accessor repositories
                  :documentation "Library version repositories")
+   (custom-repositories :initarg :custom-repositories
+			:initform nil
+			:accessor custom-repositories)
    (dependencies :initarg :dependencies
                  :initform nil
                  :accessor dependencies
@@ -200,6 +223,7 @@
     (add-element "stability" (stability library-version) doc)
     (add-element "description" (description library-version) doc)
     (add-element "repositories" (mapcar #'encode-repository (repositories library-version)) doc)
+    (add-element "custom-repositories" (mapcar #'encode-repository (custom-repositories library-version)) doc)
     (add-element "dependencies" (mapcar #'encode-requirement (dependencies library-version)) doc)
     (add-element "creation-time" (creation-time library-version) doc)
     (if (doc library-version)
@@ -224,6 +248,8 @@
 		 :description (get-element "description" doc)
 		 :repositories (mapcar #'decode-repository 
 				       (get-element "repositories" doc))
+		 :repositories (mapcar #'decode-repository 
+				       (get-element "custom-repositories" doc))
 		 :dependencies (mapcar #'cldm::read-requirement-from-string
 				       (get-element "dependencies" doc))
 		 :doc doc))
@@ -241,7 +267,7 @@
 (defun decode-repository (doc)
   (make-instance 'cldm::library-version-repository
 		 :name (get-element "name" doc)
-		 :address (cldm::parse-version-repository-address 
+		 :address (cldm::parse-repository-address 
 			   (read-from-string (get-element "address" doc)))))
 
 (defun encode-requirement (requirement)
@@ -272,6 +298,10 @@
 	  (setf (keywords stored-library) (cldm::library-keywords cldm-library))
 	  (setf (author stored-library) (cldm::library-author cldm-library))
 	  (setf (maintainer stored-library) (cldm::library-maintainer cldm-library))
+	  (setf (homepage stored-library) (cldm::library-homepage cldm-library))
+	  (setf (library-documentation stored-library) (cldm::library-documentation cldm-library))
+	  (setf (bug-reports stored-library) (cldm::library-bug-reports cldm-library))
+	  (setf (source-repository stored-library) (cldm::library-source-repository cldm-library))
 	  (let ((library-version (make-instance 'library-version
 						:version (cldm::version cldm-library-version)
 						:description (cldm::description cldm-library-version)
@@ -290,6 +320,10 @@
 				      :licence (cldm::library-licence cldm-library)
 				      :author (cldm::library-author cldm-library)
 				      :maintainer (cldm::library-maintainer cldm-library)
+				      :homepage (cldm::library-homepage cldm-library)
+				      :documentation (cldm::library-documentation cldm-library)
+				      :bug-reports (cldm::library-bug-reports cldm-library)
+				      :source-repository (cldm::library-source-repository cldm-library)
 				      :publisher publisher)))
 	  (store library)
 	  (let* ((cldm-library-version (first (cldm::library-versions cldm-library)))
@@ -299,6 +333,7 @@
 						 :stability (cldm::stability cldm-library-version)
 						 :version (cldm::version cldm-library-version)
 						 :repositories (cldm::repositories cldm-library-version)
+						 :custom-repositories (cldm::custom-repositories cldm-library-version)
 						 :dependencies (cldm::dependencies cldm-library-version))))
 	    (store library-version))))))
 
@@ -331,7 +366,9 @@
     (assert (or (equalp deflibrary 'cldm:deflibrary)
 		(equalp deflibrary 'cl-user::deflibrary)))
     (destructuring-bind (&key author maintainer description
-			      licence cld version keywords &allow-other-keys)
+			      licence cld version keywords 
+			      homepage documentation bug-reports source-repository
+			      &allow-other-keys)
 	options
       (if version
 	  (progn
@@ -351,13 +388,21 @@
 				  :description description
 				  :licence licence
 				  :cld (cldm::parse-cld-address cld)
+				  :homepage homepage
+				  :documentation documentation
+				  :bug-reports bug-reports
+				  :source-repository source-repository
 				  :keywords keywords
 				  :versions nil))
 		  (library-version (make-instance 'cldm::library-version
 						  :version (cldm::read-version-from-string (getf options :version))
 						  :stability (getf options :stability)
 						  :repositories (cldm::parse-version-repositories (getf options :repositories))
-						  :dependencies (cldm::parse-version-dependencies (getf options :depends-on)))))
+						  :custom-repositories (cldm::parse-version-repositories (getf options :custom-repositories))
+						  :dependencies (cldm::parse-version-dependencies (getf options :depends-on))
+						  :suggests (cldm::parse-version-dependencies (getf options :suggests))
+						  :provides (cldm::parse-version-dependencies (getf options :provides))
+						  :conflicts (cldm::parse-version-dependencies (getf options :conflicts)))))
 	      (setf (cldm::library library-version) library)
 	      (setf (cldm::library-versions library)
 		    (list library-version))
@@ -377,5 +422,7 @@
         (cons "author" (model::author library))
 	(cons "description" (model::description library))
 	(cons "licence" (model::licence library))
-	(cons "keywords" (model::keywords library))
-	(cons "categories" (model::categories library))))
+	;; Montezuma doesnt support lists 
+	;(cons "keywords" (model::keywords library))
+	;(cons "categories" (model::categories library))
+	))

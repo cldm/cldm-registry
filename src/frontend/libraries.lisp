@@ -25,27 +25,47 @@
                 (:h1 (who:str name))
                 (:p (who:str (model::description library)))
                 (:p (:b (who:str "Author: ")) (who:fmt "~A" (model::author library)))
-		(:p (:b (who:str "Categories: "))
-		    (let ((categories (model::categories library)))
-		      (loop for category in (butlast categories)
-			 do
-			   (who:htm (:a :href (restas:genurl 'category-handler :name category)
-					(who:str category))
-				    (who:str ", ")))
-		      (let ((category (car (last categories))))
-			(who:htm (:a :href (restas:genurl 'category-handler :name category)
-				     (who:str category))))))
-		(:p (:b (who:str "Keywords: "))
-		    (let ((keywords (model::keywords library)))
-		      (loop for keyword in (butlast keywords)
-			 do
-			   (who:htm (:a :href (restas:genurl 'keyword-handler :name keyword)
-					(who:str keyword))
-				    (who:str ", ")))
-		      (let ((keyword (car (last keywords))))
-			(who:htm (:a :href (restas:genurl 'keyword-handler :name keyword)
-				     (who:str keyword))))))
-                (:p (:b (who:str "Licence: ")) (who:fmt "~A" (model::licence library)))
+		(awhen (model::categories library)
+		  (who:htm
+		   (:p (:b (who:str "Categories: "))
+		       (loop for category in (butlast it)
+			  do
+			    (who:htm (:a :href (restas:genurl 'category-handler :name category)
+					 (who:str category))
+				     (who:str ", ")))
+		       (let ((category (car (last it))))
+			 (who:htm (:a :href (restas:genurl 'category-handler :name category)
+				      (who:str category)))))))
+		(awhen (model::homepage library)
+		  (who:htm
+		   (:p (:b (who:str "Homepage: "))
+		       (:a :href it (who:str it)))))
+		(awhen (model::library-documentation library)
+		  (who:htm
+		   (:p (:b (who:str "Documentation: "))
+		       (:a :href it (who:str it)))))
+		(awhen (model::bug-reports library)
+		  (who:htm
+		   (:p (:b (who:str "Bug reports: "))
+		       (:a :href it (who:str it)))))
+		(awhen (model::source-repository library)
+		  (who:htm
+		   (:p (:b (who:str "Source repository: "))
+		       (:a :href it (who:str it)))))
+		(awhen (model::keywords library)
+		  (who:htm
+		   (:p (:b (who:str "Keywords: "))
+		       (loop for keyword in (butlast it)
+			  do
+			    (who:htm (:a :href (restas:genurl 'keyword-handler :name keyword)
+					 (who:str keyword))
+				     (who:str ", ")))
+		       (let ((keyword (car (last it))))
+			 (who:htm (:a :href (restas:genurl 'keyword-handler :name keyword)
+				      (who:str keyword)))))))
+		(awhen (model::licence library)
+		  (who:htm
+		   (:p (:b (who:str "Licence: ")) (who:fmt "~A" it))))
 		(let ((latest-version (first (model::library-versions library))))
 		  (who:htm
 		   (:p (:b (who:str "Latest version: "))
@@ -205,6 +225,22 @@
 			(let ((keyword (car (last keywords))))
 			  (who:htm (:a :href (restas:genurl 'keyword-handler :name keyword)
 				       (who:str keyword))))))
+		  (awhen (model::homepage library)
+		    (who:htm
+		     (:p (:b (who:str "Homepage: "))
+			 (:a :href it (who:str it)))))
+		  (awhen (model::library-documentation library)
+		    (who:htm
+		     (:p (:b (who:str "Documentation: "))
+			 (:a :href it (who:str it)))))
+		  (awhen (model::bug-reports library)
+		    (who:htm
+		     (:p (:b (who:str "Bug reports: "))
+			 (:a :href it (who:str it)))))
+		  (awhen (model::source-repository library)
+		    (who:htm
+		     (:p (:b (who:str "Source repository: "))
+			 (:a :href it (who:str it)))))
 		  (:p (:b (who:str "Licence: ")) (who:fmt "~A" (model::licence library)))
 		  (:p (:b (who:str "Version: "))
 		      (who:str (semver:print-version-to-string 
@@ -228,8 +264,8 @@
 		      (who:str (mongo::fmt (model::creation-time library-version) nil)))
 		  (:p (:b (who:str "Repositories: "))
 		      (:ul (loop for repo in (model::repositories library-version)
-				do (who:htm (:li (:b (who:fmt "~A: " (cldm::name repo)))
-						 (render-repository-address (cldm::repository-address repo)))))))))))))
+			      do (who:htm (:li (:b (who:fmt "~A: " (cldm::name repo)))
+					       (render-repository-address (cldm::repository-address repo)))))))))))))
 
 (restas:define-route library-cld-handler ("/libraries/:(name).cld")
   (let ((library (model::find-library-by-name name)))
