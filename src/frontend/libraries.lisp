@@ -141,6 +141,35 @@
 		 (who:str (cldm::library-name requirement)))
 	     (render-version-constraint version-constraint))))))
 
+(defgeneric render-repository-address (repository-address)
+  (:method ((repository-address cldm::directory-repository-address))
+    (with-html
+      (who:str (cldm::directory repository-address))))
+  (:method ((repository-address cldm::url-repository-address))
+    (with-html
+      (:a (:href (cldm::url repository-address)))))      
+  (:method ((repository-address cldm::git-repository-address))
+    (with-html
+      (who:str "git ")
+      (:a :href (cldm::url repository-address)
+	  (who:str (cldm::url repository-address)))
+      (awhen (cldm::commit repository-address)
+	(who:fmt " commit: ~A" it))
+      (awhen (cldm::branch repository-address)
+	(who:fmt " branch: ~A" it))
+      (awhen (cldm::tag repository-address)
+	(who:fmt " tag: ~A" it))))
+  (:method ((repository-address cldm::ssh-repository-address))
+    (with-html
+      (who:str "ssh ")
+      (:a :href (cldm::address repository-address)
+	  (who:str (cldm::address repository-address)))))
+  (:method ((repository-address cldm::darcs-repository-address))
+    (with-html 
+      (who:str "darcs ")
+      (:a :href (cldm::url repository-address)
+	  (who:str (cldm::url repository-address))))))
+
 (restas:define-route library-version-handler ("/versions/:name/:version")
   (let ((library-version (model::find-library-version name version)))
     (if (not library-version)
@@ -196,7 +225,11 @@
 						  (model::username publisher))
 			     (who:str (print-user-name publisher))))))
 		  (:p (:b (who:str "Published: "))
-		      (who:str (mongo::fmt (model::creation-time library-version) nil)))))))))
+		      (who:str (mongo::fmt (model::creation-time library-version) nil)))
+		  (:p (:b (who:str "Repositories: "))
+		      (:ul (loop for repo in (model::repositories library-version)
+				do (who:htm (:li (who:fmt "~A: " (cldm::name repo))
+						 (render-repository-address (cldm::repository-address repo)))))))))))))
 
 (restas:define-route library-cld-handler ("/libraries/:(name).cld")
   (let ((library (model::find-library-by-name name)))
