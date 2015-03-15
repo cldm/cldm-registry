@@ -228,7 +228,7 @@
 		      (who:str (mongo::fmt (model::creation-time library-version) nil)))
 		  (:p (:b (who:str "Repositories: "))
 		      (:ul (loop for repo in (model::repositories library-version)
-				do (who:htm (:li (who:fmt "~A: " (cldm::name repo))
+				do (who:htm (:li (:b (who:fmt "~A: " (cldm::name repo)))
 						 (render-repository-address (cldm::repository-address repo)))))))))))))
 
 (restas:define-route library-cld-handler ("/libraries/:(name).cld")
