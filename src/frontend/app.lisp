@@ -25,6 +25,9 @@
   (restas:start '#:cldm-registry.frontend :hostname host
 		:port port))
 
+(defun stop ()
+  (restas:stop-all))
+
 (restas:mount-module -static- (#:restas.directory-publisher)
   (:url "/static/")
   (restas.directory-publisher:*directory* 
