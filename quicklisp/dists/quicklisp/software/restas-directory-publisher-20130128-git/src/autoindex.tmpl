@@ -1,0 +1,106 @@
+// -*- closure-template-html -*-
+// directory-publisher.tmpl
+//
+// This file is part of the restas-directory-publisher library, released under Lisp-LGPL.
+// See file COPYING for details.
+// 
+// Author: Moskvitin Andrey <archimag@gmail.com>
+
+
+{namespace restas.directory-publisher.view}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Autoindex content
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+{template autoindexContent}
+    <table summary="Directory Listing" cellpadding="0" cellspacing="0">
+        <thead>
+            <tr>
+                <th class="n">Name</th>
+                <th class="m">Last Modified</th>
+                <th class="s">Size</th>
+                <th class="t">Type</th></tr>
+        </thead>
+
+        <tbody>
+            {if $parents}
+                <tr>
+                    <td class="n">
+                        <a href="{$parents[length($parents) - 1].href}">Parent Directory</a>/
+                    </td>
+                    <td class="m">&nbsp;</td>
+                    <td class="s">- &nbsp;</td>
+                    <td class="t">Directory</td>
+                </tr>
+            {/if}
+
+            {foreach $item in $directories}
+                <tr>
+                    <td class="n">
+                        <a href="{$item.href}">{$item.name}/</a>
+                    </td>
+                    <td class="m">{$item.lastModified}</td>
+                    <td class="s">{$item.size ? $item.size : '- &nbsp;' |noAutoescape}</td>
+                    <td class="t">Directory</td>
+                </tr>
+            {/foreach}
+
+            {foreach $item in $files}
+                <tr>
+                    <td class="n">
+                        <a href="{$item.href}">{$item.name}</a>
+                    </td>
+                    <td class="m">{$item.lastModified}</td>
+                    <td class="s">{$item.size ? $item.size : '- &nbsp;' |noAutoescape}</td>
+                    <td class="t">{$item.mimeType}</td>
+                </tr>
+            {/foreach}
+        </tbody>
+    </table>
+{/template}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Autoindex standalone frame
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+{template autoindex}
+    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+    <html xmlns="http://www.w3.org/1999/xhtml">
+        <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+            <title>{$title}</title>
+
+            <style type="text/css">
+                {literal}
+                    a, a:active {text-decoration: none; color: blue;}
+                    a:visited {color: #48468F;}
+                    a:hover, a:focus {text-decoration: underline; color: red;}
+                    body {background-color: #F5F5F5;}
+                    h2 {margin-bottom: 12px;}
+                    table {margin-left: 12px;}
+                    th, td { font: 90% monospace; text-align: left;}
+                    th { font-weight: bold; padding-right: 14px; padding-bottom: 3px;}
+                    td {padding-right: 14px;}
+                    td.s, th.s {text-align: right;}
+                    div.list { background-color: white; border-top: 1px solid #646464; 
+                               border-bottom: 1px solid #646464; padding-top: 10px; 
+                               padding-bottom: 14px;}
+                    div.foot { font: 90% monospace; color: #787878; padding-top: 4px;}
+                {/literal}
+            </style>
+        </head>
+
+        <body>
+            <h2>{$title}</h2>
+            <div class="list">
+                {call autoindex-content data="all" /}
+            </div>
+            <div class="foot"></div>
+        </body>
+    </html>
+{/template}
+
+
